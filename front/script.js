@@ -43,7 +43,7 @@ function post() {
 
     fetch(url, config)
     .then(data => { return data.json(); })
-    .then(res  => { window.location.assign('./pages/table.html'); })
+    .then(res  => { window.location.assign('./front/pages/table.html'); })
     .catch(e   => { console.log(e); })
 };
 
