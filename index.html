@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>講義選択最適化</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="header">
+        <h1>講義選択最適化</h1>
+    </div>
+    <div class="container">
+        <header><h2>コース選択</h2></header>
+        <form class="form">
+            <div class="select">
+                <select id="compulsory">
+                    <option value="default">学科</option>
+                    <option value="知能情報工学科">知能情報工学科</option>
+                    <option value="情報通信工学科">情報通信工学科</option>
+                    <option value="知的システム工学科">知的システム工学科</option>
+                    <option value="物理情報工学化">物理情報工学化</option>
+                    <option value="生命化学情報工学化">生命化学情報工学化</option>
+                </select>
+                <select id="grade">
+                    <option value="default">学年</option>
+                    <option value="M1">M1</option>
+                    <option value="M2">M2</option>
+                    <option value="D1">D1</option>
+                    <option value="D2">D2</option>
+                    <option value="D3">D3</option>
+                </select>
+                <select id="quarter">
+                    <option value="default">クオーター</option>
+                    <option value="Q1">Q1</option>
+                    <option value="Q2">Q2</option>
+                    <option value="Q3">Q3</option>
+                    <option value="Q4">Q4</option>
+                </select>
+                <br>
+                <select id="special">
+                    <option value="default">専門深化プログラム</option>
+                    <option value="データ化学コース">データ化学コース</option>
+                    <option value="人工知能コース">人工知能コース</option>
+                    <option value="メディア情報学コース">メディア情報学コース</option>
+                    <option value="ソフトウェアデザインコース">ソフトウェアデザインコース</option>
+                    <option value="情報通信ネットワークコース">情報通信ネットワークコース</option>
+                    <option value="コンピュータ工学コース">コンピュータ工学コース</option>
+                    <option value="ロボティクスコース">ロボティクスコース</option>
+                    <option value="システム制御コース">システム制御コース</option>
+                    <option value="先進機械コース">先進機械コース</option>
+                    <option value="電子物理コース">電子物理コース</option>
+                    <option value="生物物理コース">生物物理コース</option>
+                    <option value="分子生命工学コース">分子生命工学コース</option>
+                    <option value="医用生命工学コース">医用生命工学コース</option>
+                </select>
+                <select id="social">
+                    <option value="default">社会駆動プログラム</option>
+                    <option value="AI応用コース">AI応用コース</option>
+                    <option value="金融流通コース">金融流通コース</option>
+                    <option value="ソフトウェア開発プロセスコース">ソフトウェア開発プロセスコース</option>
+                    <option value="画像認識コース">画像認識コース</option>
+                    <option value="ロボティクスシンセシス導入コース">ロボティクスシンセシス導入コース</option>
+                    <option value="計算力学エンジニアコース">計算力学エンジニアコース</option>
+                    <option value="大規模計算科学：基礎と実践コース">大規模計算科学：基礎と実践コース</option>
+                    <option value="アントレプレナーシップコース">アントレプレナーシップコース</option>
+                    <option value="情報教育支援コース">情報教育支援コース</option>
+                    <option value="生命体工学コース">生命体工学コース</option>
+                    <option value="国際エンジニアリング共同講義コース">国際エンジニアリング共同講義コース</option>
+                    <option value="需要創発コース">需要創発コース</option>
+                    <option value="マイクロ化技術実践コース">マイクロ化技術実践コース</option>
+                    <option value="情報工学導入コース">情報工学導入コース</option>
+                </select>
+            </div>
+
+
+            <header><h2>条件選択</h2></header>
+            <div class="slider-container">
+                <label class="label" for="slider1">条件１</label>
+                <div class="meter">
+                    <input type="range" id="slider1" min="-10" max="10" value="0" step="1" oninput="updateValueFromSlider('number1', this.value)">
+                    <input type="number" id="number1" min="-10" max="10" value="0" oninput="updateValueFromInput('slider1', this.value)">
+                </div>
+            </div>
+            <div class="slider-container">
+                <label class="label" for="slider2">条件２</label>
+                <div class="meter">
+                    <input type="range" id="slider2" min="-10" max="10" value="0" step="1" oninput="updateValueFromSlider('number2', this.value)">
+                    <input type="number" id="number2" min="-10" max="10" value="0" oninput="updateValueFromInput('slider2', this.value)">
+                </div>
+            </div>
+            <div class="slider-container">
+                <label class="label" for="slider3">条件３</label>
+                <div class="meter">
+                    <input type="range" id="slider3" min="-10" max="10" value="0" step="1" oninput="updateValueFromSlider('number3', this.value)">
+                    <input type="number" id="number3" min="-10" max="10" value="0" oninput="updateValueFromInput('slider3', this.value)">
+                </div>
+            </div>
+
+            <header><h2>キーワード選択</h2></header>
+            <div class="keywords">
+                <input type="checkbox" id="key1" value="科学技術日本語"><label for="key1">科学技術日本語</label>
+                <input type="checkbox" id="key2" value="英語"><label for="key2">英語</label>
+                <input type="checkbox" id="key3" value="初等整数論"><label for="key3">初等整数論</label>
+                <input type="checkbox" id="key4" value="群論"><label for="key4">群論</label>
+                <input type="checkbox" id="key5" value="可換環論"><label for="key5">可換環論</label>
+                <input type="checkbox" id="key6" value="有限体論"><label for="key6">有限体論</label>
+                <input type="checkbox" id="key7" value="RSA暗号"><label for="key7">RSA暗号</label>
+                <input type="checkbox" id="key8" value="ElGamal暗号"><label for="key8">ElGamal暗号</label>
+                <input type="checkbox" id="key9" value="楕円曲線号"><label for="key9">楕円曲線号</label>
+                <input type="checkbox" id="key10" value="機械学習"><label for="key10">機械学習</label>
+                <input type="checkbox" id="key11" value="深層学習"><label for="key11">深層学習</label>
+                <input type="checkbox" id="key12" value="深層学習"><label for="key12">深層学習</label>
+                <input type="checkbox" id="key13" value="深層学習"><label for="key13">深層学習</label>
+                <input type="checkbox" id="key14" value="深層学習"><label for="key14">深層学習</label>
+                <input type="checkbox" id="key15" value="深層学習"><label for="key15">深層学習</label>
+                <input type="checkbox" id="key16" value="深層学習"><label for="key16">深層学習</label>
+                <input type="checkbox" id="key17" value="深層学習"><label for="key17">深層学習</label>
+                <input type="checkbox" id="key18" value="深層学習"><label for="key18">深層学習</label>
+                <input type="checkbox" id="key19" value="深層学習"><label for="key19">深層学習</label>
+                <input type="checkbox" id="key20" value="深層学習"><label for="key20">深層学習</label>
+            </div>
+        </form>
+        <div class="button-wrapper"><button id="submit" class="submit" onclick="post()">submit</button></div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

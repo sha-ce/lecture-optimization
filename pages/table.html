@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>講義選択最適化</title>
+    <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+    <div class="header">
+        <h1>講義選択最適化</h1>
+    </div>
+    <div class="container">
+        <h1>時間割</h1>
+
+        <table class="timetable">
+            <thead>
+                <tr>
+                    <th class="table-top"></th>
+                    <th class="table-top">月</th>
+                    <th class="table-top">火</th>
+                    <th class="table-top">水</th>
+                    <th class="table-top">木</th>
+                    <th class="table-top">金</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- 1限から7限までの時間割 -->
+                <!-- JSでセルに講義を追加する関数を呼び出すためのボタンを追加 -->
+                <!-- 行 (1限〜7限) -->
+                <tr>
+                    <td class="rows">1限</td>
+                    <td><div id="mon1" class="cell"><button onclick="addLecture(this)">+</button></div></td>
+                    <td><div id="tue1" class="cell"><button onclick="addLecture(this)">+</button></div></td>
+                    <td><div id="wed1" class="cell"><button onclick="addLecture(this)">+</button></div></td>
+                    <td><div id="thu1" class="cell"><button onclick="addLecture(this)">+</button></div></td>
+                    <td><div id="fri1" class="cell"><button onclick="addLecture(this)">+</button></div></td>
+                </tr>
+                <tr>
+                    <td class="rows">2限</td>
+                    <td><div id="mon2" class="cell"><button onclick="addLecture(this)">+</button></div></td>
+                    <td><div id="tue2" class="cell"><button onclick="addLecture(this)">+</button></div></td>
+                    <td><div id="wed2" class="cell"><button onclick="addLecture(this)">+</button></div></td>
+                    <td><div id="thu2" class="cell"><button onclick="addLecture(this)">+</button></div></td>
+                    <td><div id="fri2" class="cell"><button onclick="addLecture(this)">+</button></div></td>
+                </tr>
+                <tr>
+                    <td class="rows">3限</td>
+                    <td><div id="mon3" class="cell"><button onclick="addLecture(this)">+</button></div></td>
+                    <td><div id="tue3" class="cell"><button onclick="addLecture(this)">+</button></div></td>
+                    <td><div id="wed3" class="cell"><button onclick="addLecture(this)">+</button></div></td>
+                    <td><div id="thu3" class="cell"><button onclick="addLecture(this)">+</button></div></td>
+                    <td><div id="fri3" class="cell"><button onclick="addLecture(this)">+</button></div></td>
+                </tr>
+                <tr>
+                    <td class="rows">4限</td>
+                    <td><div id="mon4" class="cell"><button onclick="addLecture(this)">+</button></div></td>
+                    <td><div id="tue4" class="cell"><button onclick="addLecture(this)">+</button></div></td>
+                    <td><div id="wed4" class="cell"><button onclick="addLecture(this)">+</button></div></td>
+                    <td><div id="thu4" class="cell"><button onclick="addLecture(this)">+</button></div></td>
+                    <td><div id="fri4" class="cell"><button onclick="addLecture(this)">+</button></div></td>
+                </tr>
+                <tr>
+                    <td class="rows">5限</td>
+                    <td><div id="mon5" class="cell"><button onclick="addLecture(this)">+</button></div></td>
+                    <td><div id="tue5" class="cell"><button onclick="addLecture(this)">+</button></div></td>
+                    <td><div id="wed5" class="cell"><button onclick="addLecture(this)">+</button></div></td>
+                    <td><div id="thu5" class="cell"><button onclick="addLecture(this)">+</button></div></td>
+                    <td><div id="fri5" class="cell"><button onclick="addLecture(this)">+</button></div></td>
+                </tr>
+                <tr>
+                    <td class="rows">6限</td>
+                    <td><div id="mon6" class="cell"><button onclick="addLecture(this)">+</button></div></td>
+                    <td><div id="tue6" class="cell"><button onclick="addLecture(this)">+</button></div></td>
+                    <td><div id="wed6" class="cell"><button onclick="addLecture(this)">+</button></div></td>
+                    <td><div id="thu6" class="cell"><button onclick="addLecture(this)">+</button></div></td>
+                    <td><div id="fri6" class="cell"><button onclick="addLecture(this)">+</button></div></td>
+                </tr>
+            </tbody>
+        </table>
+        <div class="button-wrapper"><button id="optim" class="submit" onclick="get()">講義選択</button></div>
+    </div>
+    <script src="../script.js"></script>
+</body>
+</html>
