@@ -6,9 +6,12 @@ function updateValueFromInput(id, value) {
     if (value >= slider.min && value <= slider.max) {slider.value = value;}
 }
 
-// const BASE_URL = 'http://127.0.0.1:8000/'
-const ip = document.getElementById('ip').value;
-const BASE_URL = 'http://'+ip+':8000/';
+var BASE_URL = 'http://127.0.0.1:8000/';
+function setIP() {
+    // const BASE_URL = 'http://127.0.0.1:8000/'
+    const ip = document.getElementById('ip').value;
+    BASE_URL = 'http://'+ip+':8000/';
+}
 
 function post() {
     const compulsory = document.getElementById('compulsory').value;

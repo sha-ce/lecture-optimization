@@ -30,6 +30,14 @@ body {
     z-index: 1000;
 }
 
+#ip {
+    padding: 10px 20px;
+    border-radius: 5px;
+    background-color: #fefefe;
+    border: solid 0.1px #eee;
+    color: #555;
+}
+
 .container {
     width: 90%;
     max-width: 1000px;
