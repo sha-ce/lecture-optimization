@@ -44,8 +44,8 @@ class Table(BaseModel):
 @app.get('/table/')
 def get():
     table = Table()
-    table.time_table['2']['tue'] = {'name': '自然言語処理', 'teacher': '嶋田 和孝', 'unit': 2}
-    table.time_table['3']['fri'] = {'name': '自然言語処理', 'teacher': '嶋田 和孝', 'unit': 2}
+    table.time_table['2']['tue'] = {'name': '自然言語処理特論', 'teacher': '嶋田 和孝', 'unit': 2}
+    table.time_table['3']['fri'] = {'name': '自然言語処理特論', 'teacher': '嶋田 和孝', 'unit': 2}
     table.time_table['4']['wed'] = {'name': 'ベンチャービジネス創出論', 'teacher': '中藤 良久', 'unit': 1}
     table.time_table['5']['wed'] = {'name': 'ベンチャービジネス創出論', 'teacher': '中藤 良久', 'unit': 1}
     table.time_table['1']['thu'] = {'name': '知能情報演習', 'teacher': '嶋田 和孝', 'unit': 1}
