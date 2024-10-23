@@ -4,7 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>講義選択最適化</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.6.1/nouislider.css">
     <link rel="stylesheet" href="./front/styles.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.6.1/nouislider.min.js"></script>
 </head>
 <body>
     <div class="header">
@@ -81,53 +83,117 @@
 
 
             <header><h2>条件選択</h2></header>
-            <div class="slider-container">
-                <label class="label" for="slider1">条件１</label>
+            <form id="ratingForm"><div id="questions"></div></form>
+            <script>
+                let el = document.getElementById('questions');
+                let titles = [
+                    '授業日数は少ない方がいいですか？',
+                    '宿題はどれくらいしたくないですか？',
+                    '単位数は多い方がいいですか？',
+                    'リモート授業は好きですか？',
+                    'どれくらい自分の興味のある授業を受けたいですか？',
+                    '早朝の授業はどれくらい嫌ですか？',
+                    'テストのある授業は嫌ですか？',
+                ];
+                let labels = [
+                    ['　多い方がいい', '少ない方がいい'],
+                    ['多い方がいい', 'したくない　'],
+                    ['　多い方がいい', '少ない方がいい'],
+                    ['　　　　好き', '好きではない'],
+                    ['興味のない授業も受けたい', '興味のある授業を受けたい'],
+                    ['　　　好き', 'めっちゃ嫌'],
+                    ['　　　好き', 'めっちゃ嫌'],
+                ];
+                for (let i=0; i<titles.length; i++) {
+                    let incode = (
+                        '<div class="question">'+
+                        '<label class="label">'+titles[i]+'</label>'+
+                        '<div class="rating-group" data-name="friends">'+
+                        '<span class="label-left">'+labels[i][0]+'</span>'+
+                        '<input type="radio" id="q'+String(i)+'--5" name="q'+String(i)+'" value="-5"><label for="q'+String(i)+'--5" class="circle-left circle-5"></label>'+
+                        '<input type="radio" id="q'+String(i)+'--4" name="q'+String(i)+'" value="-4"><label for="q'+String(i)+'--4" class="circle-left circle-4"></label>'+
+                        '<input type="radio" id="q'+String(i)+'--3" name="q'+String(i)+'" value="-3"><label for="q'+String(i)+'--3" class="circle-left circle-3"></label>'+
+                        '<input type="radio" id="q'+String(i)+'--2" name="q'+String(i)+'" value="-2"><label for="q'+String(i)+'--2" class="circle-left circle-2"></label>'+
+                        '<input type="radio" id="q'+String(i)+'--1" name="q'+String(i)+'" value="-1"><label for="q'+String(i)+'--1" class="circle-left circle-1"></label>'+
+                        '<input type="radio" id="q'+String(i)+'-0" name="q'+String(i)+'" value="0"><label for="q'+String(i)+'-0" class="circle-center"></label>'+
+                        '<input type="radio" id="q'+String(i)+'-1" name="q'+String(i)+'" value="1"><label for="q'+String(i)+'-1" class="circle-right circle-1"></label>'+
+                        '<input type="radio" id="q'+String(i)+'-2" name="q'+String(i)+'" value="2"><label for="q'+String(i)+'-2" class="circle-right circle-2"></label>'+
+                        '<input type="radio" id="q'+String(i)+'-3" name="q'+String(i)+'" value="3"><label for="q'+String(i)+'-3" class="circle-right circle-3"></label>'+
+                        '<input type="radio" id="q'+String(i)+'-4" name="q'+String(i)+'" value="4"><label for="q'+String(i)+'-4" class="circle-right circle-4"></label>'+
+                        '<input type="radio" id="q'+String(i)+'-5" name="q'+String(i)+'" value="5"><label for="q'+String(i)+'-5" class="circle-right circle-5"></label>'+
+                        '<span class="label-right">'+labels[i][1]+'</span>'+
+                        '</div></div>'
+                    )
+                    el.insertAdjacentHTML("beforeend", incode);
+                }
+            </script>
+
+            <div class="question">
+                <label class="label" for="slider1">授業は何時以降に入れたいですか？</label>
+                <select id="lecture-early" oninput="updateValueFromInput('slider1', this.value)">
+                    <option value="1">08:50(1限〜)</option>
+                    <option value="2">10:30(2限〜)</option>
+                    <option value="3">13:00(3限〜)</option>
+                    <option value="4">14:40(4限〜)</option>
+                    <option value="5">16:20(5限〜)</option>
+                </select>
                 <div class="meter">
-                    <input type="range" id="slider1" min="-10" max="10" value="0" step="1" oninput="updateValueFromSlider('number1', this.value)">
-                    <input type="number" id="number1" min="-10" max="10" value="0" oninput="updateValueFromInput('slider1', this.value)">
+                    <input type="range" id="slider1" min="1" max="5" value="1" step="1" oninput="updateValueFromSlider('lecture-early', this.value)">
                 </div>
             </div>
-            <div class="slider-container">
-                <label class="label" for="slider2">条件２</label>
-                <div class="meter">
-                    <input type="range" id="slider2" min="-10" max="10" value="0" step="1" oninput="updateValueFromSlider('number2', this.value)">
-                    <input type="number" id="number2" min="-10" max="10" value="0" oninput="updateValueFromInput('slider2', this.value)">
-                </div>
+            <script>
+                function updateValueFromSlider(id, value) { document.getElementById(id).value = value; };
+                function updateValueFromInput(id, value) { document.getElementById(id).value = value; };
+            </script>
+            <div class="question">
+                <label class="label" for="slider3">目標単位数の幅を指定してください</label>
+                <div class="range-wrapper"><div id="range"></div></div>
+                <input type="number" id="min-units" min="0" max="30" value="2" readonly placeholder="min">単位以上
+                <input type="number" id="max-units" min="0" max="30" value="10" readonly placeholder="max">単位以下
+                <script>
+                    const range = document.getElementById('range');
+                    const num2 = document.getElementById('min-units');
+                    const num3 = document.getElementById('max-units');
+                    noUiSlider.create(range, {
+                        range: {
+                            'min': 0,
+                            'max': 30
+                        },
+                        step: 1,
+                        start: [num2.value, num3.value],
+                        connect: true,
+                        behaviour: 'tap-drag',
+                        tooltips: false,
+                        pips: {
+                            mode: 'steps',
+                            stepped: true,
+                            density: 10
+                        }
+                    });
+                    range.noUiSlider.on('update', function( values, handle ) {
+                        num2.value = Math.trunc(values[0]);
+                        num3.value = Math.trunc(values[1]);
+                    });
+                </script>
             </div>
-            <div class="slider-container">
-                <label class="label" for="slider3">条件３</label>
-                <div class="meter">
-                    <input type="range" id="slider3" min="-10" max="10" value="0" step="1" oninput="updateValueFromSlider('number3', this.value)">
-                    <input type="number" id="number3" min="-10" max="10" value="0" oninput="updateValueFromInput('slider3', this.value)">
-                </div>
-            </div>
+            
 
             <header><h2>キーワード選択</h2></header>
-            <div class="keywords">
-                <input type="checkbox" id="key1" value="科学技術日本語"><label for="key1">科学技術日本語</label>
-                <input type="checkbox" id="key2" value="英語"><label for="key2">英語</label>
-                <input type="checkbox" id="key3" value="初等整数論"><label for="key3">初等整数論</label>
-                <input type="checkbox" id="key4" value="群論"><label for="key4">群論</label>
-                <input type="checkbox" id="key5" value="可換環論"><label for="key5">可換環論</label>
-                <input type="checkbox" id="key6" value="有限体論"><label for="key6">有限体論</label>
-                <input type="checkbox" id="key7" value="RSA暗号"><label for="key7">RSA暗号</label>
-                <input type="checkbox" id="key8" value="ElGamal暗号"><label for="key8">ElGamal暗号</label>
-                <input type="checkbox" id="key9" value="楕円曲線号"><label for="key9">楕円曲線号</label>
-                <input type="checkbox" id="key10" value="機械学習"><label for="key10">機械学習</label>
-                <input type="checkbox" id="key11" value="深層学習"><label for="key11">深層学習</label>
-                <input type="checkbox" id="key12" value="深層学習"><label for="key12">深層学習</label>
-                <input type="checkbox" id="key13" value="深層学習"><label for="key13">深層学習</label>
-                <input type="checkbox" id="key14" value="深層学習"><label for="key14">深層学習</label>
-                <input type="checkbox" id="key15" value="深層学習"><label for="key15">深層学習</label>
-                <input type="checkbox" id="key16" value="深層学習"><label for="key16">深層学習</label>
-                <input type="checkbox" id="key17" value="深層学習"><label for="key17">深層学習</label>
-                <input type="checkbox" id="key18" value="深層学習"><label for="key18">深層学習</label>
-                <input type="checkbox" id="key19" value="深層学習"><label for="key19">深層学習</label>
-                <input type="checkbox" id="key20" value="深層学習"><label for="key20">深層学習</label>
-            </div>
+            <div class="keywords" id="keywords"></div>
+            <script>
+                let el_key = document.getElementById('keywords');
+                var keywords = [
+                    '科学技術日本語', '英語', '初等整数論', '群論', '可換環論', 
+                    '有限体論', 'RSA暗号', '楕円曲線号', '機械学習', '深層学習',
+                    '最適化', 'ソルバー',
+                ];
+                for (let i=0; i<keywords.length; i++) {
+                    let incode = '<input type="checkbox" id="key'+String(i)+'" value="'+keywords[i]+'"><label for="key'+String(i)+'">'+keywords[i]+'</label>'
+                    el_key.insertAdjacentHTML("beforeend", incode);
+                }
+            </script>
         </form>
-        <div class="button-wrapper"><button id="submit" class="submit" onclick="post()">submit</button></div>
+        <div class="button-wrapper"><button type="submit" id="submit" class="submit" onclick="post()">submit</button></div>
     </div>
 
     <script src="./front/script.js"></script>
