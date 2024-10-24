@@ -1,5 +1,3 @@
-
-
 var BASE_URL = 'http://127.0.0.1:8000/';
 function setIP() {
     // const BASE_URL = 'http://127.0.0.1:8000/'
@@ -10,15 +8,20 @@ function setIP() {
     alert('set: '+BASE_URL);
 }
 
+
 function post() {
     const compulsory = document.getElementById('compulsory').value;
     const grade = document.getElementById('grade').value;
     const quarter = document.getElementById('quarter').value;
     const special = document.getElementById('special').value;
     const social = document.getElementById('social').value;
+    if (compulsory == 'default' | grade == 'default' | quarter == 'default' | special == 'default' | social == 'default') {
+        alert('「コース選択」で未選択の項目があります');
+        return false;
+    }
 
     const alphas = [];
-    for (let i=0; i<titles.length; i++) {
+    for (let i=0; i<questions.length; i++) {
         let ele = document.getElementsByName('q'+String(i));
         for (let i = 0; i < ele.length; i++){
             if (ele.item(i).checked){

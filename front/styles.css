@@ -50,7 +50,6 @@ body {
 header {
     margin-bottom: 20px;
 }
-
 h1 {
     text-align: center;
     font-size: 24px;
@@ -61,6 +60,10 @@ h2 {
     font-size: 20px;
     color: #555;
     padding-top: 30px;
+}
+header p {
+    font-size: 0.8rem;
+    text-align: center;
 }
 
 .slider-container {
@@ -437,7 +440,7 @@ button:hover {
 /* popup window */
 
 .popup {
-    display: block;
+    display: none;
     position: fixed;
     z-index: 0;
     margin: 0;
@@ -480,4 +483,10 @@ button:hover {
     text-decoration: none;
     cursor: pointer;
     transition: 0.3s;
+}
+
+
+/* レスポンシブ対応 */
+@media screen and (max-width: 480px) {
+
 }
