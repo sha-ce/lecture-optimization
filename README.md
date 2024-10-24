@@ -27,3 +27,7 @@ uvicorn main:app --reload
 
 などの項目を送信すると講義候補が返ってくるイメージ。<br>
 `table.html`で簡単なテーブルを描画する。
+
+## ToDo
+[ ] - 環境をDockerに変更.
+[ ] - 

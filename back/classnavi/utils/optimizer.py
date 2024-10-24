@@ -1,7 +1,15 @@
 import pandas as pd
 import pulp
 import json
-from .calc_similarity import calc_similarity
+from utils.calc_similarity import calc_similarity
+
+def normalize_column(df, column):
+    """各列を0から1の範囲に正規化するための関数"""
+    min_val = df[column].min()
+    max_val = df[column].max()
+    if max_val - min_val == 0:
+        return df[column]  # 値が全て同じ場合はそのまま返す
+    return (df[column] - min_val) / (max_val - min_val)
 
 def optimize_classes(alpha_values, data_path='data.csv', L_early=0, min_units=1, max_units=float('inf'), keywords=""):
     
@@ -24,28 +32,33 @@ def optimize_classes(alpha_values, data_path='data.csv', L_early=0, min_units=1,
     # コサイン類似度を df に追加
     similarity_dict = {item[0]: item[2] for item in similarities}
     df['similarity'] = df['classname'].map(similarity_dict)
+
+    # 各項目を正規化 (0-1にスケーリング)
+    df['homework'] = normalize_column(df, 'homework')
+    df['numofunits'] = normalize_column(df, 'numofunits')
+    df['similarity'] = normalize_column(df, 'similarity')
+    df['q_i'] = normalize_column(df, 'q_i')
+    df['test'] = normalize_column(df, 'test')
     
     # MILP 問題を定義
-    problem = pulp.LpProblem("Class_Selection", pulp.LpMinimize)
+    problem = pulp.LpProblem("Class_Selection", pulp.LpMaximize)
     
     # 変数の定義
     x_vars = {i: pulp.LpVariable(f'x_{i}', cat='Binary') for i in df.index}
-    y_vars = {d: pulp.LpVariable(f'y_{d}', cat='Binary') for d in set(''.join(df['days'].unique()))}
     
-    # 目的関数の設定
+    # 目的関数の設定: ここで x_vars を直接使用して授業日数を最適化
     problem += (
-        alpha_values[0] * pulp.lpSum(y_vars[d] for d in y_vars) + # 授業日数の最適化
-        alpha_values[1] * pulp.lpSum(df.loc[i, 'homework'] * x_vars[i] for i in df.index) - # 課題の多さの最適化
-        alpha_values[2] * pulp.lpSum(df.loc[i, 'numofunits'] * x_vars[i] for i in df.index) - # 単位数の最適化
-        alpha_values[3] * pulp.lpSum(df.loc[i, 'remote'] * x_vars[i] for i in df.index) - # リモート授業の多さの最適化
-        alpha_values[4] * pulp.lpSum(df.loc[i, 'similarity'] * x_vars[i] for i in df.index) + # 興味のある授業の多さを最適化
-        alpha_values[5] * pulp.lpSum(df.loc[i, 'q_i'] * x_vars[i] for i in df.index) + # 早朝授業の多さを最適化
-        alpha_values[6] * pulp.lpSum(df.loc[i, 'test'] * x_vars[i] for i in df.index) # テストの多さを最適化
+        alpha_values[5] * pulp.lpSum(df.loc[i, 'q_i'] * x_vars[i] for i in df.index) -  # 早朝授業の多さを最適化
+        alpha_values[0] * pulp.lpSum(  # 授業日数の最適化 (x_vars を直接使う)
+            pulp.lpSum(x_vars[i] for i in df[df['days'].str.contains(day)].index) >= 1
+            for day in ['月', '火', '水', '木', '金']
+        ) +
+        alpha_values[1] * pulp.lpSum(df.loc[i, 'homework'] * x_vars[i] for i in df.index) -  # 課題の多さの最適化
+        alpha_values[2] * pulp.lpSum(df.loc[i, 'numofunits'] * x_vars[i] for i in df.index) -  # 単位数の最適化
+        alpha_values[3] * pulp.lpSum(df.loc[i, 'remote'] * x_vars[i] for i in df.index) -  # リモート授業の多さの最適化
+        alpha_values[4] * pulp.lpSum(df.loc[i, 'similarity'] * x_vars[i] for i in df.index) +  # 興味のある授業の多さを最適化
+        alpha_values[6] * pulp.lpSum(df.loc[i, 'test'] * x_vars[i] for i in df.index)  # テストの多さを最適化
     )
-    
-    # 制約条件: 授業日数のインジケータ
-    for d in y_vars:
-        problem += y_vars[d] >= pulp.lpSum(x_vars[i] for i in df[df['days'].str.contains(d)].index)
     
     # 制約条件: 授業時間の重複を避ける
     for day in set(''.join(df['days'].unique())):
@@ -59,7 +72,10 @@ def optimize_classes(alpha_values, data_path='data.csv', L_early=0, min_units=1,
 
     # **追加された制約条件: '必修'科目は必ず選択する**
     for i in df[df['unitclass'] == '必修'].index:
-        problem += x_vars[i] == 1, f"RequiredClass_{i}"
+        # 必修科目が選択された場合、その授業が行われる曜日も授業日数としてカウントする
+        problem += x_vars[i] == 1  # 必修科目は必ず選ばれる
+        for day in df.loc[i, 'days']:  # 授業が行われる曜日を授業日数に反映
+            problem += pulp.lpSum(x_vars[j] for j in df[df['days'].str.contains(day)].index) >= 1
     
     # 制約条件: 最低単位数と最大単位数の制約を追加
     total_units = pulp.lpSum(df.loc[i, 'numofunits'] * x_vars[i] for i in df.index)
@@ -67,6 +83,8 @@ def optimize_classes(alpha_values, data_path='data.csv', L_early=0, min_units=1,
     problem += total_units <= max_units, "MaximumUnits"
     total_units_available = df['numofunits'].sum()
     print(f"Available total units: {total_units_available}")
+
+    problem.writeLP("class_selection.lp")
     
     # 最適化
     status = problem.solve(pulp.PULP_CBC_CMD(msg=False))
