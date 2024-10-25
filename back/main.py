@@ -50,13 +50,17 @@ def get():
         item = f.read()
     item = json.loads(item)
     
+    user_prefer = ''
+    for keyword in item['keywords']:
+        user_prefer += f', {keyword}'
+    
     result = optimize_classes(
         [int(alpha) for alpha in item['alphas']],
         './classnavi/datas/data.csv',
         int(item['l_early']),
         int(item['units'][0]),
         int(item['units'][1]),
-        item['keywords'][0],
+        user_prefer,
     )
 
     day_en2jp = {'月': 'mon', '火': 'tue', '水': 'wed', '木': 'thu', '金': 'fri'}

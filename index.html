@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
+    <!-- <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests"> -->
     <title>講義選択最適化</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.6.1/nouislider.css">
-    <link rel="stylesheet" href="./front/styles.css">
+    <link rel="stylesheet" href="./front/css/styles.css">
+    <script src="https://kit.fontawesome.com/0fcff45f50.js" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.6.1/nouislider.min.js"></script>
 </head>
 <body>
@@ -14,166 +14,51 @@
         <h1>講義選択最適化</h1>
     </div>
     <div class="container">
-        <!-- <form class="form">
-            <input type="text" id="ip" placeholder="backend server IP address">
-            <button id="sub" class="submit" onclick="setIP()">set IP</button>
-        </form> -->
-        <input type="text" id="ip" placeholder="server IP address">
-        <button id="sub" class="submit" onclick="setIP()">set IP</button>
-        <header>
-            <h2>コース選択</h2>
-            <p>学科、学年、クオーター、専門進化プログラム、社会駆動プログラムを選択してください。</p>
-        </header>
+        <input type="text" id="ip" placeholder="server IP address"><button id="sub" class="submit" onclick="setIP()">set IP</button>
         <form class="form">
-            <script>
-                function addSelectOption(id, options) {
-                    let e = document.getElementById(id);
-                    for (let option of options) { e.insertAdjacentHTML("beforeend", '<option value="'+option+'">'+option+'</option>'); }
-                }
-            </script>
-            <div class="select">
-                <select id="compulsory">
-                    <option value="default">学科</option>
-                    <script>addSelectOption('compulsory', ['知能情報工学科', '情報通信工学科', '知的システム工学科', '物理情報工学科', '生命科学情報工学科']); </script>
-                </select>
-                <select id="grade">
-                    <option value="default">学年</option>
-                    <script>addSelectOption('grade', ['M1', 'M2', 'D1', 'D2', 'D3']); </script>
-                </select>
-                <select id="quarter">
-                    <option value="default">クオーター</option>
-                    <script>addSelectOption('quarter', ['Q1', 'Q2', 'Q3', 'Q4']); </script>
-                </select>
-                <br>
-                <select id="special">
-                    <option value="default">専門深化プログラム</option>
-                    <script>
-                        addSelectOption('special', [
-                            'データ科学コース', '人工知能コース', 'メディア情報学コース',
-                            'ソフトウェアデザインコース', '情報通信ネットワークコース', 'コンピュータ工学コース',
-                            'ロボティクスコース', 'システム制御コース', '先進機械コース',
-                            '電子物理コース', '生物物理コース', '分子生命工学コース', '医用生命工学コース',
-                        ]);
-                    </script>
-                </select>
-                <select id="social">
-                    <option value="default">社会駆動プログラム</option>
-                    <script>
-                        addSelectOption('social', [
-                            'AI応用コース', '金融流通コース', 'ソフトウェア開発プロセスコース', '画像認識コース', 
-                            'ロボティクスシンセシス導入コース', '計算力学エンジニアコース', '大規模計算科学：基礎と実践コース',
-                            'アントレプレナーシップコース', '情報教育支援コース', '生命体工学コース',
-                            '国際エンジニアリング共同講義コース', '需要創発コース', 'マイクロ化技術実践コース', '情報工学導入コース',
-                        ]);
-                    </script>
-                </select>
+            <!-- コース選択 -->
+            <div id="question-cource-select">
+                <header><h2>コース選択</h2><p>各項目に対してあなたに該当するラベルを選択してください</p></header>
+                <div class="select">
+                    <select id="compulsory"><option value="default">学科</option></select>
+                    <select id="grade"><option value="default">学年</option></select>
+                    <select id="quarter"><option value="default">クオーター</option></select>
+                    <select id="special"><option value="default">専門深化プログラム</option></select>
+                    <select id="social"><option value="default">社会駆動プログラム</option></select>
+                </div>
+                <!-- <div class="button-wrapper"><button class="arrow" onclick="toConditions()"><i class="fa-solid fa-chevron-right"></i></button></div> -->
             </div>
 
+            <!-- 条件選択 -->
+            <div id="question-conditions-select">
+                <header><h2>条件選択</h2><p>講義に対してのあなたの好みを選択してください。<br>特に気にする項目だけ選択してもらっても構いません。</p></header>
+                <form id="ratingForm"><div id="questions"></div></form>
 
-            <header>
-                <h2>条件選択</h2>
-                <p>選択したい講義に関するあなたの好みを選択してください。<br>特に気にする項目だけ選択してもらっても構いません。</p>
-            </header>
-            <form id="ratingForm"><div id="questions"></div></form>
-            <script>
-                let el = document.getElementById('questions');
-                let questions = [
-                    {title: '授業日数は少ない方がいいですか？', labels: ['　多い方がいい', '少ない方がいい']},
-                    {title: '宿題はどれくらいしたくないですか？', labels: ['多い方がいい', 'したくない　']},
-                    {title: '単位数は多い方がいいですか？', labels: ['　多い方がいい', '少ない方がいい']},
-                    {title: 'リモート授業は好きですか？', labels: ['　　　　好き', '好きではない']},
-                    {title: 'どれくらい自分の興味のある授業を受けたいですか？', labels:['興味のない授業も受けたい', '興味のある授業を受けたい']},
-                    {title: '早朝の授業はどれくらい嫌ですか？', labels: ['　　　好き', 'めっちゃ嫌']},
-                    {title: 'テストのある授業は嫌ですか？', labels: ['　　　好き', 'めっちゃ嫌']},
-                ]
-                for (let i=0; i<questions.length; i++) {
-                    let incode = (
-                        '<div class="question">'+
-                        '<label class="label">'+questions[i].title+'</label>'+
-                        '<div class="rating-group" data-name="friends">'+
-                        '<span class="label-left">'+questions[i].labels[0]+'</span>'+
-                        '<input type="radio" id="q'+String(i)+'--5" name="q'+String(i)+'" value="-5"><label for="q'+String(i)+'--5" class="circle-left circle-5"></label>'+
-                        '<input type="radio" id="q'+String(i)+'--4" name="q'+String(i)+'" value="-4"><label for="q'+String(i)+'--4" class="circle-left circle-4"></label>'+
-                        '<input type="radio" id="q'+String(i)+'--3" name="q'+String(i)+'" value="-3"><label for="q'+String(i)+'--3" class="circle-left circle-3"></label>'+
-                        '<input type="radio" id="q'+String(i)+'--2" name="q'+String(i)+'" value="-2"><label for="q'+String(i)+'--2" class="circle-left circle-2"></label>'+
-                        '<input type="radio" id="q'+String(i)+'--1" name="q'+String(i)+'" value="-1"><label for="q'+String(i)+'--1" class="circle-left circle-1"></label>'+
-                        '<input type="radio" id="q'+String(i)+'-0" name="q'+String(i)+'" value="0" checked><label for="q'+String(i)+'-0" class="circle-center"></label>'+
-                        '<input type="radio" id="q'+String(i)+'-1" name="q'+String(i)+'" value="1"><label for="q'+String(i)+'-1" class="circle-right circle-1"></label>'+
-                        '<input type="radio" id="q'+String(i)+'-2" name="q'+String(i)+'" value="2"><label for="q'+String(i)+'-2" class="circle-right circle-2"></label>'+
-                        '<input type="radio" id="q'+String(i)+'-3" name="q'+String(i)+'" value="3"><label for="q'+String(i)+'-3" class="circle-right circle-3"></label>'+
-                        '<input type="radio" id="q'+String(i)+'-4" name="q'+String(i)+'" value="4"><label for="q'+String(i)+'-4" class="circle-right circle-4"></label>'+
-                        '<input type="radio" id="q'+String(i)+'-5" name="q'+String(i)+'" value="5"><label for="q'+String(i)+'-5" class="circle-right circle-5"></label>'+
-                        '<span class="label-right">'+questions[i].labels[1]+'</span>'+
-                        '</div></div>'
-                    )
-                    el.insertAdjacentHTML("beforeend", incode);
-                }
-            </script>
-
-            <div class="question">
-                <label class="label" for="slider1">授業は何時以降に入れたいですか？</label>
-                <select id="lecture-early" oninput="updateValueFromInput('slider1', this.value)">
-                    <option value="1">08:50(1限〜)</option>
-                    <option value="2">10:30(2限〜)</option>
-                    <option value="3">13:00(3限〜)</option>
-                    <option value="4">14:40(4限〜)</option>
-                    <option value="5">16:20(5限〜)</option>
-                </select>
-                <div class="meter">
-                    <input type="range" id="slider1" min="1" max="5" value="1" step="1" oninput="updateValueFromSlider('lecture-early', this.value)">
+                <div class="question">
+                    <label class="label" for="slider1">授業は何時以降に入れたいですか？</label>
+                    <select id="lecture-early" oninput="updateValueFromInput('slider1', this.value)"></select>
+                    <div class="meter">
+                        <input type="range" id="slider1" min="1" max="5" value="1" step="1" oninput="updateValueFromSlider('lecture-early', this.value)">
+                    </div>
+                </div>
+                <div class="question">
+                    <label class="label" for="slider3">履修予定単位数の最小値と最大値を指定してください</label>
+                    <div class="range-wrapper"><div id="range"></div></div>
+                    <input type="number" id="min-units" min="0" max="30" value="2" readonly placeholder="min">単位以上
+                    <input type="number" id="max-units" min="0" max="30" value="10" readonly placeholder="max">単位以下
                 </div>
             </div>
-            <script>
-                function updateValueFromSlider(id, value) { document.getElementById(id).value = value; };
-                function updateValueFromInput(id, value) { document.getElementById(id).value = value; };
-            </script>
-            <div class="question">
-                <label class="label" for="slider3">目標単位数の最小値と最大値を指定してください</label>
-                <div class="range-wrapper"><div id="range"></div></div>
-                <input type="number" id="min-units" min="0" max="30" value="2" readonly placeholder="min">単位以上
-                <input type="number" id="max-units" min="0" max="30" value="10" readonly placeholder="max">単位以下
-                <script>
-                    const range = document.getElementById('range');
-                    const num2 = document.getElementById('min-units');
-                    const num3 = document.getElementById('max-units');
-                    noUiSlider.create(range, {
-                        range: {'min': 0, 'max': 30},
-                        step: 1,
-                        start: [num2.value, num3.value],
-                        connect: true,
-                        behaviour: 'tap-drag',
-                        tooltips: false,
-                        pips: {mode: 'steps', stepped: true, density: 10}
-                    });
-                    range.noUiSlider.on('update', function( values, handle ) {
-                        num2.value = Math.trunc(values[0]);
-                        num3.value = Math.trunc(values[1]);
-                    });
-                </script>
+            
+            <!-- キーワード選択 -->
+            <div id="question-keywords-select">
+                <header><h2>キーワード選択</h2><p>あなたの興味のある分野を選択してください。（複数選択可）</p></header>
+                <div class="keywords" id="keywords"></div>
             </div>
             
-
-            <header>
-                <h2>キーワード選択</h2>
-                <p>あなたの興味のある分野を選択してください。（複数選択可）</p>
-            </header>
-            <div class="keywords" id="keywords"></div>
-            <script>
-                let el_key = document.getElementById('keywords');
-                var keywords = [
-                    '科学技術日本語', '英語', '初等整数論', '群論', '可換環論', 
-                    '有限体論', 'RSA暗号', '楕円曲線号', '機械学習', '深層学習',
-                    '最適化', 'ソルバー',
-                ];
-                for (let i=0; i<keywords.length; i++) {
-                    let incode = '<input type="checkbox" id="key'+String(i)+'" value="'+keywords[i]+'"><label for="key'+String(i)+'">'+keywords[i]+'</label>'
-                    el_key.insertAdjacentHTML("beforeend", incode);
-                }
-            </script>
         </form>
         <div class="button-wrapper"><button type="submit" id="submit" class="submit" onclick="post()">submit</button></div>
     </div>
-
-    <script src="./front/script.js"></script>
+    <script src="./front/js/script.js"></script>
+    <script src="./front/js/active_index.js"></script>
 </body>
 </html>
