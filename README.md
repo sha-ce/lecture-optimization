@@ -1,14 +1,58 @@
-## backend
-### 環境構築
+## 環境の立ち上げ
+1. ![Groq](https://console.groq.com/keys)からGroq API Keyを取得．
+2. .env.templateの名前を.envに変更し，中身を以下のように変更．
 ```bash
-cd back
-conda create -n <name> python pip
-conda activate <name>
-pip install 'fastapi[all]' uvicorn
+GROQ_API=<取得したAPI Key>
 ```
-### サーバーをたてるコマンド
+Docker環境が使える環境で以下のコマンドを実行．
 ```bash
-uvicorn main:app --reload
+docker-compose up --build
+```
+その後，frontendはhttp://localhost:3000，backendはhttp://localhost:8080に立ち上がる．
+
+## Backend
+バックエンドのAPIドキュメントは
+http://localhost:8080/docsに立ち上げられる．このURLにアクセスするとusernameとパスワードが求められるため，以下のusernameとパスワードを入力．
+- username: lectapp
+- password: @pp
+### LLMのテスト
+llmのAPIのリクエストボディは以下のような形式で入力．
+```
+{
+  "questions": [
+    "僕はみんなの要望を受けて，時間割の提案を変更するエージェントだよ．何か要望があれば言ってね．",
+    "朝起きるの苦手なんだー"
+  ],
+  "preferences": {
+    "Few early morning classes": 0,
+    "Optimization of class days": 0,
+    "Optimization of credit hours": 0,
+    "Fewer remote classes": 0,
+    "Fewer courses of interest":0,
+    "Fewer exams": 0,
+    "Fewer assignments": 0
+  }
+}
+```
+
+リクエストを与えると必要であればLLMが自動でパラメータを調整して，以下のようなレスポンスを返す．
+```
+{
+  "response": [
+    "僕はみんなの要望を受けて，時間割の提案を変更するエージェントだよ．何か要望があれば言ってね．",
+    "朝起きるの苦手なんだー",
+    "あはは、寝るのが好きな奴だな！朝起きるのは大変だよねぇ。何時まで寝てたの？"
+  ],
+  "new_params": {
+    "Few early morning classes": 2,
+    "Optimization of class days": 0,
+    "Fewer assignments": 0,
+    "Optimization of credit hours": 0,
+    "Fewer remote classes": 0,
+    "Fewer courses of interest": 0,
+    "Fewer exams": 0
+  }
+}
 ```
 
 ## frontend
@@ -29,5 +73,10 @@ uvicorn main:app --reload
 `table.html`で簡単なテーブルを描画する。
 
 ## ToDo
-[ ] - 環境をDockerに変更.
-[ ] - 
+- [x] LLMによるエージェントのAPI実装(Backend)
+- [ ] クオーターの制約実装(Backend)
+- [ ] 既習単位の排除アルゴリズム(Backend)
+- [ ] 集中講義のレコメンド機能の考案
+- [ ] 優先したい項目を選択できるようにしたらいいのでは？
+- [ ] 既習単位の単位数を出力する関数の実装(Backend)
+- [ ] 日本語->英語->LLM処理->英語->日本語

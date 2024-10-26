@@ -46,7 +46,7 @@ if __name__ == "__main__":
     alpha_values, L_early, min_units, max_units, user_prefer = get_user_input()
     
     # 授業選択の最適化
-    result = optimize_classes(alpha_values, 'datas/data.csv', L_early, min_units, max_units, user_prefer)
+    result = optimize_classes(alpha_values, 'datas/data_old.csv', L_early, min_units, max_units, user_prefer)
     print(result)
     
     # JSON形式の文字列を辞書形式に変換

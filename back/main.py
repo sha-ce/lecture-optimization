@@ -1,86 +1,40 @@
-from fastapi import FastAPI
-from pydantic import BaseModel
-import uvicorn
-from typing import List
-from fastapi.middleware.cors import CORSMiddleware
-import json
+from fastapi import FastAPI, Depends, HTTPException, status
+from starlette.middleware.cors import CORSMiddleware
+from fastapi.openapi.docs import get_swagger_ui_html
+from fastapi.security import HTTPBasic, HTTPBasicCredentials
 
-from classnavi.utils.optimizer import optimize_classes
-
-app = FastAPI()
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=['*'],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+from routers import (
+    optimizer,
+    llm
 )
 
+security = HTTPBasic()
 
-class Item(BaseModel):
-    compulsory: str
-    grade: str
-    quarter: str
-    special: str
-    social: str
-    alphas: list
-    l_early: str
-    units: list
-    keywords: list
+def get_current_username(credentials: HTTPBasicCredentials = Depends(security)):
+    correct_username = "lectapp"
+    correct_password = "@pp"
+    if credentials.username != correct_username or credentials.password != correct_password:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect username or password",
+            headers={"WWW-Authenticate": "Basic"},
+        )
+    return credentials.username
 
-class Table(BaseModel):
-    time_table: object = {
-        '1': {'mon': None, 'tue': None, 'wed': None, 'thu': None, 'fri': None},
-        '2': {'mon': None, 'tue': None, 'wed': None, 'thu': None, 'fri': None},
-        '3': {'mon': None, 'tue': None, 'wed': None, 'thu': None, 'fri': None},
-        '4': {'mon': None, 'tue': None, 'wed': None, 'thu': None, 'fri': None},
-        '5': {'mon': None, 'tue': None, 'wed': None, 'thu': None, 'fri': None},
-        '6': {'mon': None, 'tue': None, 'wed': None, 'thu': None, 'fri': None},
-    }
+app = FastAPI(docs_url=None)
 
-@app.post('/conditions/')
-async def post(item: Item):
-    with open('./items.json', 'w') as f:
-        json.dump(dict(item), f, indent=4, ensure_ascii=False)
-    return item
+app.include_router(optimizer.router)
+app.include_router(llm.router)
 
-@app.get('/items/')
-def get():
-    with open('./items.json') as f:
-        item = f.read()
-    item = json.loads(item)
-    
-    result = optimize_classes(
-        [int(alpha) for alpha in item['alphas']],
-        './classnavi/datas/data.csv',
-        int(item['l_early']),
-        int(item['units'][0]),
-        int(item['units'][1]),
-        item['keywords'][0],
-    )
 
-    day_en2jp = {'月': 'mon', '火': 'tue', '水': 'wed', '木': 'thu', '金': 'fri'}
-    table = Table()
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"]
+)
 
-    try:
-        result_data = json.loads(result)
-        print(result_data)
-        
-        for entry in result_data:
-            class_name = entry['classname']
-            teacher = entry['teacher']
-            unit = entry['numofunits']
-            days = entry['days']
-            period = entry['l_i']
-
-            for day in days:
-                table.time_table[str(period)][day_en2jp[day]] = {'name': class_name, 'teacher': teacher, 'unit': unit}
-    
-    except json.JSONDecodeError as e:
-        print("JSONDecodeError:", str(e))
-        print("Returned data:", result)
-    
-    return table
-
-if __name__ == '__main__':
-    uvicorn.run('main:app', host='127.0.0.1', port=8000, reload=True, log_level='info')
+@app.get("/docs", dependencies=[Depends(get_current_username)], include_in_schema=False)
+async def get_documentation():
+    return get_swagger_ui_html(openapi_url="/openapi.json", title=app.title)

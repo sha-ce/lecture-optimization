@@ -1,7 +1,7 @@
 import pandas as pd
 import pulp
 import json
-from utils.calc_similarity import calc_similarity
+from classnavi.utils.calc_similarity import calc_similarity
 
 def normalize_column(df, column):
     """各列を0から1の範囲に正規化するための関数"""

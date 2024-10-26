@@ -8,13 +8,34 @@ function setIP() {
     alert('set: '+BASE_URL);
 }
 
+function getItemfromId(id) {
+    val = document.getElementById(id).value;
+    localStorage.setItem(id, val);
+    return val
+}
+function toConditions() {
+    const compulsory = getItemfromId('compulsory');
+    const grade = getItemfromId('grade');
+    const quarter = getItemfromId('quarter');
+    const special = getItemfromId('special');
+    const social = getItemfromId('social');
+    if (compulsory == 'default' | grade == 'default' | quarter == 'default' | special == 'default' | social == 'default') {
+        alert('未選択の項目があります');
+        return false;
+    }
 
+    let cource_select = document.getElementById('question-cource-select');
+    cource_select.style.display = 'none';
+
+    let conditions_select = document.getElementById('question-conditions-select');
+    conditions_select.style.display = '';
+}
 function post() {
-    const compulsory = document.getElementById('compulsory').value;
-    const grade = document.getElementById('grade').value;
-    const quarter = document.getElementById('quarter').value;
-    const special = document.getElementById('special').value;
-    const social = document.getElementById('social').value;
+    const compulsory = getItemfromId('compulsory');
+    const grade = getItemfromId('grade');
+    const quarter = getItemfromId('quarter');
+    const special = getItemfromId('special');
+    const social = getItemfromId('social');
     if (compulsory == 'default' | grade == 'default' | quarter == 'default' | special == 'default' | social == 'default') {
         alert('「コース選択」で未選択の項目があります');
         return false;
@@ -54,7 +75,7 @@ function post() {
         keywords: selected_keywords,
     };
 
-    const url = BASE_URL+'conditions/';
+    const url = BASE_URL+'/optimizer/conditions/';
     const config = {
         method: "POST",
         headers: {"Content-Type": "application/json"},
@@ -70,7 +91,7 @@ function post() {
 function get() {
     loading();
 
-    const url = BASE_URL+'items/';
+    const url = BASE_URL+'/optimizer/items/';
     const config = {
         method: "GET",
         headers: {"Content-Type": "application/json"},

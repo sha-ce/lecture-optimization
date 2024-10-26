@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests"> -->
+    <title>講義選択最適化</title>
+    <link rel="stylesheet" href="./front/css/styles.css">
+    <script src="https://kit.fontawesome.com/0fcff45f50.js" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.6.1/nouislider.min.js"></script>
+</head>
+<body>
+    <div class="header">
+        <h1>講義選択最適化</h1>
+    </div>
+    <div class="container">
+        <input type="text" id="ip" placeholder="server IP address"><button id="sub" class="submit" onclick="setIP()">set IP</button>
+        <form class="form">
+            <!-- コース選択 -->
+            <div id="question-cource-select">
+                <header><h2>コース選択</h2><p>各項目に対してあなたに該当するラベルを選択してください</p></header>
+                <div class="select">
+                    <select id="compulsory"><option value="default">学科</option></select>
+                    <select id="grade"><option value="default">学年</option></select>
+                    <select id="quarter"><option value="default">クオーター</option></select>
+                    <select id="special"><option value="default">専門深化プログラム</option></select>
+                    <select id="social"><option value="default">社会駆動プログラム</option></select>
+                </div>
+                <!-- <div class="button-wrapper"><button class="arrow" onclick="toConditions()"><i class="fa-solid fa-chevron-right"></i></button></div> -->
+            </div>
+
+            <!-- 条件選択 -->
+            <div id="question-conditions-select">
+                <header><h2>条件選択</h2><p>講義に対してのあなたの好みを選択してください。<br>特に気にする項目だけ選択してもらっても構いません。</p></header>
+                <form id="ratingForm"><div id="questions"></div></form>
+
+                <div class="question">
+                    <label class="label" for="slider1">授業は何時以降に入れたいですか？</label>
+                    <select id="lecture-early" oninput="updateValueFromInput('slider1', this.value)"></select>
+                    <div class="meter">
+                        <input type="range" id="slider1" min="1" max="5" value="1" step="1" oninput="updateValueFromSlider('lecture-early', this.value)">
+                    </div>
+                </div>
+                <div class="question">
+                    <label class="label" for="slider3">履修予定単位数の最小値と最大値を指定してください</label>
+                    <div class="range-wrapper"><div id="range"></div></div>
+                    <input type="number" id="min-units" min="0" max="30" value="2" readonly placeholder="min">単位以上
+                    <input type="number" id="max-units" min="0" max="30" value="10" readonly placeholder="max">単位以下
+                </div>
+            </div>
+            
+            <!-- キーワード選択 -->
+            <div id="question-keywords-select">
+                <header><h2>キーワード選択</h2><p>あなたの興味のある分野を選択してください。（複数選択可）</p></header>
+                <div class="keywords" id="keywords"></div>
+            </div>
+            
+        </form>
+        <div class="button-wrapper"><button type="submit" id="submit" class="submit" onclick="post()">submit</button></div>
+    </div>
+    <script src="./front/js/script.js"></script>
+    <script src="./front/js/active_index.js"></script>
+</body>
+</html>
