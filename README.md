@@ -8,11 +8,11 @@ Docker環境が使える環境で以下のコマンドを実行．
 ```bash
 docker-compose up --build
 ```
-その後，frontendはhttp://localhost:3000，backendはhttp://localhost:8080に立ち上がる．
+その後，frontendはhttp://localhost:3000 ，backendは http://localhost:8080に立ち上がる．
 
 ## Backend
 バックエンドのAPIドキュメントは
-http://localhost:8080/docsに立ち上げられる．このURLにアクセスするとusernameとパスワードが求められるため，以下のusernameとパスワードを入力．
+http://localhost:8080/docs に立ち上げられる．このURLにアクセスするとusernameとパスワードが求められるため，以下のusernameとパスワードを入力．
 - username: lectapp
 - password: @pp
 ### LLMのテスト
