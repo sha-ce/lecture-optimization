@@ -1,0 +1,51 @@
+/* レスポンシブ対応 */
+@media screen and (max-width: 959px) { /* タブレット */
+    *{
+        font-size: 0.8rem;
+    }
+    .container {
+        padding: 30px 5px;
+    }
+    .question {
+        padding: 20px 0;
+    }
+    .keywords label {
+        margin: 5px 1px;
+        padding: 5px;
+    }
+    .rating-group {
+        display: block;
+    }
+    .labels {
+        padding-top: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .label-left, .label-right {
+        font-weight: lighter;
+        position: relative;
+        display: block;
+    }
+    .label-left {
+        text-align: left;
+    }
+    .label-right {
+        text-align: right;
+    }
+    .res-pc {
+        display: none;
+    }
+    .res-phone {
+        /* display: grid; */
+        width: 40vw;
+        display: inline-block;
+    }
+    
+}
+
+@media screen and (max-width: 480px) { /* phone */
+    .rating-group .circle-2, .rating-group .circle-4 {
+        display: none;
+    }
+}

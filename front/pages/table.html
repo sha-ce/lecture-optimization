@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>講義選択最適化</title>
+    <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+    <div class="header">
+        <h1>講義選択最適化</h1>
+    </div>
+    <div class="container">
+        <h1>時間割</h1>
+
+        <table class="timetable">
+            <thead><tr id="table-columns"></tr></thead>
+            <tbody id="table-body"></tbody>
+        </table>
+        <div class="button-wrapper">
+            <button id="optim" class="submit" onclick="get()">
+                <p id="antiload">講義選択<p>
+                <div id="loader" class="sk-fading-circle"></div>
+            </button>
+        </div>
+    </div>
+
+    <div id="popup-window" class="popup">
+        <div class="popup-content">
+          <button id="close-popup-window" class="close" onclick="hidePopup()">×</button>
+          <p>Some text in the Modal..</p>
+        </div>
+    </div>
+
+    <script src="../js/script.js"></script>
+    <script src="../js/active_table.js"></script>
+</body>
+</html>
