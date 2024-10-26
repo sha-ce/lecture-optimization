@@ -1,5 +1,5 @@
 ## 環境の立ち上げ
-1. ![Groq](https://console.groq.com/keys)からGroq API Keyを取得．
+1. [Groq](https://console.groq.com/keys)からGroq API Keyを取得．
 2. .env.templateの名前を.envに変更し，中身を以下のように変更．
 ```bash
 GROQ_API=<取得したAPI Key>
