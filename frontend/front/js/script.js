@@ -1,42 +1,20 @@
-var BASE_URL = 'http://127.0.0.1:8000/';
-function setIP() {
-    // const BASE_URL = 'http://127.0.0.1:8000/'
-    var ip = document.getElementById('ip');
-    BASE_URL = ip.value+':8000/';
-    ip.value = '';
-    ip.placeholder = 'Completed !';
-    alert('set: '+BASE_URL);
-}
+
+const CURRENT_URL = window.location.href.split('/');
+const BASE_URL = `${CURRENT_URL[0]}//${CURRENT_URL[2].split(':')[0]}:8080/`
 
 function getItemfromId(id) {
     val = document.getElementById(id).value;
     localStorage.setItem(id, val);
     return val
 }
-function toConditions() {
+function getDatafromForm() {
     const compulsory = getItemfromId('compulsory');
     const grade = getItemfromId('grade');
     const quarter = getItemfromId('quarter');
     const special = getItemfromId('special');
     const social = getItemfromId('social');
-    if (compulsory == 'default' | grade == 'default' | quarter == 'default' | special == 'default' | social == 'default') {
-        alert('未選択の項目があります');
-        return false;
-    }
-
-    let cource_select = document.getElementById('question-cource-select');
-    cource_select.style.display = 'none';
-
-    let conditions_select = document.getElementById('question-conditions-select');
-    conditions_select.style.display = '';
-}
-function post() {
-    const compulsory = getItemfromId('compulsory');
-    const grade = getItemfromId('grade');
-    const quarter = getItemfromId('quarter');
-    const special = getItemfromId('special');
-    const social = getItemfromId('social');
-    if (compulsory == 'default' | grade == 'default' | quarter == 'default' | special == 'default' | social == 'default') {
+    // if (compulsory == 'default' | grade == 'default' | quarter == 'default' | special == 'default' | social == 'default') {
+    if (compulsory == 'default' | quarter == 'default' | special == 'default' | social == 'default') {
         alert('「コース選択」で未選択の項目があります');
         return false;
     }
@@ -63,7 +41,7 @@ function post() {
         if (el.checked) { selected_keywords.push(el.value); }
     }
 
-    let data = {
+    return {
         compulsory: compulsory,
         grade: grade,
         quarter: quarter,
@@ -74,24 +52,34 @@ function post() {
         units: units,
         keywords: selected_keywords,
     };
+}
+function post(local=false) {
+    let data = getDatafromForm();
+    
+    if (local) {
+        window.location.assign('./front/pages/table.html');
+        return false
+    }
 
-    const url = BASE_URL+'/optimizer/conditions/';
+    const url = BASE_URL+'optimizer/conditions/';
     const config = {
         method: "POST",
         headers: {"Content-Type": "application/json"},
         body: JSON.stringify(data),
     }
-
     fetch(url, config)
     .then(data => { return data.json(); })
-    .then(res  => { window.location.assign('./front/pages/table.html'); })
-    .catch(e   => { console.log(e); })
+    .then(res  => {
+        window.location.assign('./front/pages/table.html');
+    })
+    .catch(e   => {
+        alert(e);
+        return false
+    })
 };
 
 function get() {
-    loading();
-
-    const url = BASE_URL+'/optimizer/items/';
+    const url = BASE_URL+'optimizer/items/';
     const config = {
         method: "GET",
         headers: {"Content-Type": "application/json"},
@@ -103,7 +91,11 @@ function get() {
         loaded();
         fill(res.time_table);
     })
-    .catch(e  => { console.log(e); })
+    .catch(e  => {
+        alert(e);
+        loaded();
+        return false
+    })
 };
 
 function initTable(e) {
@@ -116,7 +108,7 @@ function fill(table) {
     for (let i of ['1', '2', '3', '4', '5', '6']) {
         for (let day of ['mon', 'tue', 'wed', 'thu', 'fri']) {
             let c = table[i][day];
-            let el = document.getElementById(day+i);
+            let el = document.getElementById(`${day}-${i}`);
             initTable(el.children);
             if (c != null) {
                 let incode = '<div class="course"><ul><li>'+c.name+'</li><li>'+c.teacher+'</li><li>'+String(c.unit)+'単位</li></ul></div>'
@@ -141,13 +133,42 @@ function loaded() {
 }
 
 
-function addLecture() {
+// popup
+function removeCand() { document.getElementById('classes-wrapper').remove(); }
+function setCand(classes) {
+    let popclass_el = document.getElementById('popup-classes');
+    let inline = `<div id="classes-wrapper" class="">`;
+    for (let c of classes) { inline += `<div class="">${c.classname}</div>`; }
+    popclass_el.insertAdjacentHTML("beforeend", `${inline}</div>`);
+}
+function popup(cell) {
     document.getElementById('popup-window').style.display = 'block';
+
+    const url = BASE_URL+'optimizer/cell/';
+    const config = {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({
+            quarter: {'Q1': 1, 'Q2': 2, 'Q3': 3, 'Q4': 4}[localStorage.getItem('quarter')],
+            daytime: cell.parentNode.id
+        }),
+    }
+
+    fetch(url, config)
+    .then(data => { return data.json(); })
+    .then(res  => {
+        setCand(JSON.parse(res)['data']);
+    })
+    .catch(e   => {
+        alert(e);
+        return false
+    })
 }
 function hidePopup() {
     document.getElementById('popup-window').style.display = 'none';
+    removeCand();
 }
 window.onclick = function(event) {
-    const puwin = document.getElementById('popup-window');
-    if (event.target == puwin) { puwin.style.display = "none"; }
+    const popwin = document.getElementById('popup-window');
+    if (event.target == popwin) { popwin.style.display = "none"; removeCand(); }
 }

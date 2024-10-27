@@ -1,6 +1,6 @@
 {
     "compulsory": "知能情報工学科",
-    "grade": "M1",
+    "grade": "default",
     "quarter": "Q1",
     "special": "データ科学コース",
     "social": "AI応用コース",
@@ -19,6 +19,6 @@
         "10"
     ],
     "keywords": [
-        "深層学習"
+        "最適化"
     ]
 }

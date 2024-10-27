@@ -22,6 +22,10 @@ class Table(BaseModel):
         '6': {'mon': None, 'tue': None, 'wed': None, 'thu': None, 'fri': None},
     }
 
+class Cell(BaseModel):
+    quarter: int=1
+    daytime: str='mon-1'
+
 class ChatInput(BaseModel):
     questions: List[str]
     preferences: Dict[str, int]

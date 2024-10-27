@@ -13,7 +13,7 @@ body {
     justify-content: center;
     align-items: center;
     /* height: 100vh; */
-    margin: 60px 0;
+    /* margin: 60px 0; */
     padding: 100px 0;
 }
 
@@ -67,7 +67,7 @@ select:hover {
     vertical-align: center;
     padding: 2vh 0;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-    z-index: 1000;
+    z-index: 10;
 }
 
 #ip {
@@ -78,9 +78,14 @@ select:hover {
     color: #555;
 }
 
+.container-wrapper {
+    width: min(1000px, 98%);
+    display: block;
+}
 .container {
     width: min(1000px, 98%);
     background-color: #fff;
+    margin-bottom: 50px;
     padding: 50px;
     border-radius: 8px;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);

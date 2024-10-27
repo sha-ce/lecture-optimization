@@ -8,7 +8,8 @@ function addSelectOption(id, options) {
     }
 }
 addSelectOption('compulsory', ['知能情報工学科', '情報通信工学科', '知的システム工学科', '物理情報工学科', '生命科学情報工学科']);
-addSelectOption('grade', ['M1', 'M2', 'D1', 'D2', 'D3']);
+// addSelectOption('grade', ['M1', 'M2', 'D1', 'D2', 'D3']);
+document.getElementById('grade').style.display = 'none';
 addSelectOption('quarter', ['Q1', 'Q2', 'Q3', 'Q4']);
 addSelectOption('special', [
     'データ科学コース', '人工知能コース', 'メディア情報学コース', 'ソフトウェアデザインコース', '情報通信ネットワークコース', 'コンピュータ工学コース',
