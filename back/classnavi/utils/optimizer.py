@@ -2,6 +2,7 @@ import pandas as pd
 import pulp
 import json
 from classnavi.utils.calc_similarity import calc_similarity
+from classnavi.utils.getinfofrompdf import identify_completed_courses_pipeline
 
 def normalize_column(df, column):
     """各列を0から1の範囲に正規化するための関数"""
@@ -11,10 +12,16 @@ def normalize_column(df, column):
         return df[column]  # 値が全て同じ場合はそのまま返す
     return (df[column] - min_val) / (max_val - min_val)
 
-def optimize_classes(alpha_values, data_path='data.csv', L_early=0, min_units=1, max_units=float('inf'), keywords=""):
+def optimize_classes(alpha_values, data_path='data.csv', L_early=0, min_units=1, max_units=float('inf'), keywords="", pdf_path=None):
     
     # データ読み込み
     df = pd.read_csv(data_path)
+
+    # PDFファイルから習得済みの授業を抽出
+    if pdf_path is not None:
+        completed_courses = identify_completed_courses_pipeline(pdf_path, data_path)
+    else:
+        completed_courses = []
     
     # 'when'カラムから授業開始時間 (l_i) と曜日を抽出
     df['l_i'] = df['when'].str.extract('(\d+)').astype(int)
@@ -59,6 +66,11 @@ def optimize_classes(alpha_values, data_path='data.csv', L_early=0, min_units=1,
         alpha_values[4] * pulp.lpSum(df.loc[i, 'similarity'] * x_vars[i] for i in df.index) +  # 興味のある授業の多さを最適化
         alpha_values[6] * pulp.lpSum(df.loc[i, 'test'] * x_vars[i] for i in df.index)  # テストの多さを最適化
     )
+
+    # 修得済み授業の制約を追加
+    for i in df.index:
+        if df.loc[i, 'classname'] in completed_courses:
+            problem += x_vars[i] == 0
     
     # 制約条件: 授業時間の重複を避ける
     for day in set(''.join(df['days'].unique())):
@@ -94,11 +106,11 @@ def optimize_classes(alpha_values, data_path='data.csv', L_early=0, min_units=1,
     
     # 最適化問題のステータスを確認し、適切なメッセージを出力
     if pulp.LpStatus[status] == 'Infeasible':
-        # infeasible になった場合、必修科目のみ選択して結果を返す
-        required_classes = df[df['unitclass'] == '必修']
+        # infeasible の場合、必修科目のみ選択し、他の授業は選択可能なもののみを返す
+        selected_classes = df[(df['unitclass'] == '必修') | (df.index.isin([i for i in df.index if x_vars[i].value() == 1]))]
         return json.dumps({
             "message": "制約が厳しすぎます。必修科目のみ選択されました。",
-            "selected_classes": required_classes.to_dict(orient='records')
+            "selected_classes": selected_classes.to_dict(orient='records')
         }, ensure_ascii=False)
     elif pulp.LpStatus[status] == 'Optimal':
         result = df[df.index.isin([i for i in df.index if x_vars[i].value() == 1])].to_dict(orient='records')

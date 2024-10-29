@@ -1,16 +1,49 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, File, UploadFile, Form
 from models import Item, Table, Cell
 import json
 import pandas as pd
 from classnavi.utils.optimizer import optimize_classes
+from pathlib import Path
+from typing import Optional
+import os
 
 router = APIRouter(prefix="/optimizer", tags=["optimizer"])
 
+# 任意のパス（保存先ディレクトリ）
+SAVE_DIRECTORY = "./uploads/pdf_files"
+
+# 保存ディレクトリが存在しない場合は作成
+Path(SAVE_DIRECTORY).mkdir(parents=True, exist_ok=True)
+
 @router.post("/conditions/")
-async def post(item: Item):
+async def post(item: str = Form(...), pdf_file: Optional[UploadFile] = File(None)):
+
+    # itemをJSONからItemモデルにデコード
+    item_data = json.loads(item)
+    item_obj = Item(**item_data)
+
+    # PDFファイルの保存パスを設定
+    pdf_save_path = os.path.join(SAVE_DIRECTORY, pdf_file.filename)
+
+    # PDFファイルが提供されている場合は保存、ない場合はNoneを設定
+    if pdf_file:
+        # PDFファイルの保存パスを設定
+        pdf_save_path = os.path.join(SAVE_DIRECTORY, pdf_file.filename)
+        
+        # PDFファイルを保存
+        with open(pdf_save_path, "wb") as f:
+            content = await pdf_file.read()  # PDFファイルの内容を読み込み
+            f.write(content)  # 保存先パスに書き出し
+    else:
+        pdf_save_path = None
+
+    # PDFファイルのパスをitem_dataに追加
+    item_data["pdf_file_path"] = pdf_save_path
+
     with open('./items.json', 'w') as f:
-        json.dump(dict(item), f, indent=4, ensure_ascii=False)
-    return item
+        json.dump(item_data, f, indent=4, ensure_ascii=False)
+
+    return {"item": item, "pdf_file_path": pdf_save_path}
 
 @router.get("/items/")
 def get():
@@ -25,6 +58,7 @@ def get():
         int(item['units'][0]),
         int(item['units'][1]),
         item['keywords'][0] if item['keywords'] != [] else '',
+        item["pdf_file_path"]
     )
 
     day_en2jp = {'月': 'mon', '火': 'tue', '水': 'wed', '木': 'thu', '金': 'fri'}
