@@ -42,7 +42,7 @@ def optimize_classes(alpha_values, data_path='data.csv', L_early=0, min_units=1,
 
     # 各項目を正規化 (0-1にスケーリング)
     df['homework'] = normalize_column(df, 'homework')
-    df['numofunits'] = normalize_column(df, 'numofunits')
+    df['numofunits_normalized'] = normalize_column(df, 'numofunits')
     df['similarity'] = normalize_column(df, 'similarity')
     df['q_i'] = normalize_column(df, 'q_i')
     df['test'] = normalize_column(df, 'test')
@@ -61,7 +61,7 @@ def optimize_classes(alpha_values, data_path='data.csv', L_early=0, min_units=1,
             for day in ['月', '火', '水', '木', '金']
         ) +
         alpha_values[1] * pulp.lpSum(df.loc[i, 'homework'] * x_vars[i] for i in df.index) -  # 課題の多さの最適化
-        alpha_values[2] * pulp.lpSum(df.loc[i, 'numofunits'] * x_vars[i] for i in df.index) -  # 単位数の最適化
+        alpha_values[2] * pulp.lpSum(df.loc[i, 'numofunits_normalized'] * x_vars[i] for i in df.index) -  # 単位数の最適化
         alpha_values[3] * pulp.lpSum(df.loc[i, 'remote'] * x_vars[i] for i in df.index) -  # リモート授業の多さの最適化
         alpha_values[4] * pulp.lpSum(df.loc[i, 'similarity'] * x_vars[i] for i in df.index) +  # 興味のある授業の多さを最適化
         alpha_values[6] * pulp.lpSum(df.loc[i, 'test'] * x_vars[i] for i in df.index)  # テストの多さを最適化

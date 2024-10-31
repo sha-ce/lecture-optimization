@@ -22,25 +22,6 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 groq_api_key = os.getenv("GROQ_API")
 groq_chat = ChatGroq(groq_api_key=groq_api_key, model_name="llama3-70b-8192")
 
-# FAISS_DB_DIR = "vectorstore"
-
-# Document Loader
-# loader = DirectoryLoader(path="./../data_old", loader_cls=CSVLoader, glob="*.csv")
-# raw_docs = loader.load()
-
-# # Document Transformers
-# text_splitter = RecursiveCharacterTextSplitter(chunk_size=100, chunk_overlap=50)
-# docs = text_splitter.split_documents(raw_docs)
-
-# # Embeddings
-# embedding = HuggingFaceEmbeddings(model_name="intfloat/multilingual-e5-base")
-# faiss_db = FAISS.from_documents(documents=docs, embedding=embedding)
-
-# # Vector Store
-# faiss_db.save_local(FAISS_DB_DIR)
-
-# retriever = faiss_db.as_retriever()
-
 # パラメータの再計算が必要かどうかを判定する関数
 def NeedRecalc(chat_history: list, param_dict: dict) -> dict:
     """parameter
@@ -133,35 +114,6 @@ def NeedRecalc(chat_history: list, param_dict: dict) -> dict:
         return json.loads(json_data) 
 
     return None
-
-# def generate_response_with_rag(chat_history: list, param_list: list, recalc: bool) -> list:
-#     """
-#     ユーザーへのレスポンスを生成する関数(授業情報を読み込ませる)
-#     """
-
-#     # レスポンスを再計算するかどうかに基づいてシステムプロンプトを設定
-#     if recalc is True:
-#         return "時間割の最適化をやり直したよ．確認よろしく!!"
-#     else:
-#         system_prompt = (
-#             "あなたは授業スケジュールを最適化する日本人．回答は全て日本語で行いなさい．授業を進めるときは科目名だけを示して，なんでその科目を進めたのかの理由も併せて伝えて．だけどcontextの中身はなるべく伝えないように気をつけて．ただし，回答はフラットにタメ口で友達に話す感じでよろしく!!"
-#             "Context: {context}"
-#         )
-
-#     chat_template = ChatPromptTemplate.from_messages(
-#         [
-#             ("system",system_prompt),
-#             ("ai", chat_history[-2]),
-#             ("human", "{input}")
-#         ]
-#     )
-
-#     question_answer_chain = create_stuff_documents_chain(groq_chat, chat_template)
-#     chain = create_retrieval_chain(retriever, question_answer_chain)
-#     prompt = chat_history[-1]
-#     response = chain.invoke({"input": prompt})
-
-#     return response["answer"]
 
 def generate_response(chat_history: list, param_dict: list, recalc: bool) -> str:
     """
