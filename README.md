@@ -1,5 +1,6 @@
 ## 環境の立ち上げ
 1. [Groq](https://console.groq.com/keys)からGroq API Keyを取得．
+ただし，Groq APIの無料枠は現在，1分間に30リクエスト，1日に1.4万リクエストまでとなっていることに注意．
 2. .env.templateの名前を.envに変更し，中身を以下のように変更．
 ```bash
 GROQ_API=<取得したAPI Key>
