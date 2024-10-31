@@ -59,27 +59,29 @@ def NeedRecalc(chat_history: list, param_dict: dict) -> dict:
     
     system_prompt = """You are an agent for parameter adjustment to optimize a university timetable. Each parameter indicates the importance of a specific aspect of the class schedule, with a range from -5 to 5. The current values of each parameter and their descriptions are as follows:
 
-    - Few early morning classes: {alpha_5} (-5 indicates more early morning classes, 5 indicates fewer early morning classes)
-    - Optimization of class days: {alpha_0} (-5 indicates more class days, 5 indicates fewer class days)
-    - Fewer assignments: {alpha_1} (-5 indicates more assignments, 5 indicates fewer assignments)
-    - Optimization of credit hours: {alpha_2} (-5 indicates fewer credits, 5 indicates more credits)
-    - Fewer remote classes: {alpha_3} (-5 indicates more remote classes, 5 indicates fewer remote classes)
-    - Fewer courses of interest: {alpha_4} (-5 indicates more uninteresting courses, 5 indicates more interesting courses)
-    - Fewer exams: {alpha_6} (-5 indicates more exams, 5 indicates fewer exams)
+        - Few early morning classes: {alpha_5} (-5 indicates more early morning classes, 5 indicates fewer early morning classes)
+        - Optimization of class days: {alpha_0} (-5 indicates more class days, 5 indicates fewer class days)
+        - Fewer assignments: {alpha_1} (-5 indicates more assignments, 5 indicates fewer assignments)
+        - Optimization of credit hours: {alpha_2} (-5 indicates fewer credits, 5 indicates more credits)
+        - Fewer remote classes: {alpha_3} (-5 indicates more remote classes, 5 indicates fewer remote classes)
+        - Fewer courses of interest: {alpha_4} (-5 indicates more uninteresting courses, 5 indicates more interesting courses)
+        - Fewer exams: {alpha_6} (-5 indicates more exams, 5 indicates fewer exams)
 
-    **Important**: If there is a specific user request, prioritize it above other considerations. For example, if the user requests "I don't mind attending more school days this semester," adjust the "Optimization of class days" parameter by decreasing its value to allow for an increased number of class days. Ensure all adjustments align with the user's request.
+        **Important**: If there is a specific user request, prioritize it above other considerations. For example, if the user requests "I don't mind attending more school days this semester," adjust the "Optimization of class days" parameter by decreasing its value to allow for an increased number of class days. Ensure all adjustments align with the user's request.
 
-    Based on the current values of each parameter, assess whether timetable improvements are needed, and propose appropriate adjustments. If parameter adjustments are unnecessary, respond with "None." If adjustments are needed, return JSON data in the format below, ensuring the JSON format is maintained precisely:
+        If no specific user request is identified in the latest conversation, analyze whether the current parameter values provide a balanced and optimized timetable. If adjustments are unnecessary based on the current parameter values, respond with "None." Only if there is a clear need for improvement, propose new parameter values in the following JSON format:
 
-    {{
-        "Few early morning classes": ?,
-        "Optimization of class days": ?,
-        "Fewer assignments": ?,
-        "Optimization of credit hours": ?,
-        "Fewer remote classes": ?,
-        "Fewer courses of interest": ?,
-        "Fewer exams": ?
-    }}
+        {{
+            "Few early morning classes": ?,
+            "Optimization of class days": ?,
+            "Fewer assignments": ?,
+            "Optimization of credit hours": ?,
+            "Fewer remote classes": ?,
+            "Fewer courses of interest": ?,
+            "Fewer exams": ?
+        }}
+
+        If no adjustments are needed, return "None" with no additional explanation or details.
 
         """.format(
                 alpha_0=param_dict['Optimization of class days'],
@@ -121,8 +123,11 @@ def NeedRecalc(chat_history: list, param_dict: dict) -> dict:
     response = conversation.predict(input_message=chat_prompt)
     print(response)
 
+    # 不要なコメント部分を削除して、純粋なJSONデータ部分を取得
+    cleaned_response = re.sub(r'//.*', '', response)
+
     # JSONデータの部分を抽出して返す
-    json_data_match = re.search(json_pattern, response)
+    json_data_match = re.search(json_pattern, cleaned_response)
     if json_data_match:
         json_data = json_data_match.group(0)
         return json.loads(json_data) 
