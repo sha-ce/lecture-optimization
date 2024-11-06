@@ -22,14 +22,14 @@ def parse_times(schedule):
     """
     return re.findall(r'[月火水木金土日]曜\d限', schedule)
 
-def optimize_classes(alpha_values, data_path='data.csv', L_early=0, min_units=1, max_units=float('inf'), keywords="", pdf_path=None):
+def optimize_classes(alpha_values, data_path='data.csv', L_early=0, min_units=1, max_units=float('inf'), keywords="", pdf_content=None):
     
     # データ読み込み
     df = pd.read_csv(data_path)
 
     # PDFファイルから習得済みの授業を抽出
-    if pdf_path is not None:
-        completed_courses = identify_completed_courses_pipeline(pdf_path, data_path)
+    if pdf_content is not None:
+        completed_courses = identify_completed_courses_pipeline(pdf_content, data_path)
     else:
         completed_courses = []
     
@@ -116,6 +116,7 @@ def optimize_classes(alpha_values, data_path='data.csv', L_early=0, min_units=1,
     if pulp.LpStatus[status] == 'Infeasible':
         # infeasible の場合、必修科目のみ選択し、他の授業は選択可能なもののみを返す
         selected_classes = df[(df['unitclass'] == '必修') | (df.index.isin([i for i in df.index if x_vars[i].value() == 1]))]
+        print("infeasible")
         return json.dumps({
             "message": "制約が厳しすぎます。",
             "selected_classes": selected_classes.to_dict(orient='records')
@@ -127,7 +128,7 @@ def optimize_classes(alpha_values, data_path='data.csv', L_early=0, min_units=1,
         selected_classes['formatted_times'] = selected_classes['times'].apply(lambda times: ' & '.join(times))
         
         # 整形した times 列を使用して結果を出力
-        result = selected_classes[['classname', 'formatted_times', 'unitclass', 'numofunits', "teacher", "test", "remote", "homework", "when", "semester"]].to_dict(orient='records')
+        result = selected_classes[['classname', 'formatted_times', 'unitclass', 'numofunits', "teacher", "test", "remote", "homework", "when", "semester", "l_i"]].to_dict(orient='records')
         return json.dumps(result, ensure_ascii=False)
     else:
         return f"最適化問題の解決に失敗しました。ステータス: {pulp.LpStatus[status]}"

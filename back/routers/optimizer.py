@@ -6,59 +6,26 @@ from classnavi.utils.optimizer import optimize_classes
 from pathlib import Path
 from typing import Optional
 import os
+import io
 
 router = APIRouter(prefix="/optimizer", tags=["optimizer"])
 
-# 任意のパス（保存先ディレクトリ）
-SAVE_DIRECTORY = "./uploads/pdf_files"
-
-# 保存ディレクトリが存在しない場合は作成
-Path(SAVE_DIRECTORY).mkdir(parents=True, exist_ok=True)
-
-@router.post("/conditions/")
-async def post(item: str = Form(...), pdf_file: Optional[UploadFile] = File(None)):
-
-    # itemをJSONからItemモデルにデコード
+@router.post("/items/")
+async def get_items(item: str = Form(...), pdf_file: Optional[UploadFile] = File(None)):
     item_data = json.loads(item)
-    item_obj = Item(**item_data)
 
-    # PDFファイルの保存パスを設定
-    pdf_save_path = os.path.join(SAVE_DIRECTORY, pdf_file.filename)
-
-    # PDFファイルが提供されている場合は保存、ない場合はNoneを設定
     if pdf_file:
-        # PDFファイルの保存パスを設定
-        pdf_save_path = os.path.join(SAVE_DIRECTORY, pdf_file.filename)
-        
-        # PDFファイルを保存
-        with open(pdf_save_path, "wb") as f:
-            content = await pdf_file.read()  # PDFファイルの内容を読み込み
-            f.write(content)  # 保存先パスに書き出し
-    else:
-        pdf_save_path = None
+        content = await pdf_file.read()
+        pdf_content = io.BytesIO(content)
 
-    # PDFファイルのパスをitem_dataに追加
-    item_data["pdf_file_path"] = pdf_save_path
-
-    with open('./items.json', 'w') as f:
-        json.dump(item_data, f, indent=4, ensure_ascii=False)
-
-    return {"item": item, "pdf_file_path": pdf_save_path}
-
-@router.get("/items/")
-def get():
-    with open('./items.json') as f:
-        item = f.read()
-    item = json.loads(item)
-    
     result = optimize_classes(
-        [int(alpha) for alpha in item['alphas']],
+        [int(alpha) for alpha in item_data['alphas']],
         './classnavi/data_old/data_old.csv',
-        int(item['l_early']),
-        int(item['units'][0]),
-        int(item['units'][1]),
-        item['keywords'][0] if item['keywords'] != [] else '',
-        item["pdf_file_path"]
+        int(item_data['l_early']),
+        int(item_data['units'][0]),
+        int(item_data['units'][1]),
+        item_data['keywords'][0] if item_data['keywords'] != [] else '',
+        pdf_content
     )
 
     day_en2jp = {'月': 'mon', '火': 'tue', '水': 'wed', '木': 'thu', '金': 'fri'}
@@ -66,21 +33,38 @@ def get():
 
     try:
         result_data = json.loads(result)
-        # print(result_data)
-        
+
+        print(f"result_data: {result_data}")
         for entry in result_data:
             class_name = entry['classname']
             teacher = entry['teacher']
             unit = entry['numofunits']
-            days = entry['days']
+            days = entry['formatted_times']
             period = entry['l_i']
 
-            for day in days:
-                table.time_table[str(period)][day_en2jp[day]] = {'name': class_name, 'teacher': teacher, 'unit': unit}
+            for time_entry in days.split(" & "):
+                day_jp, period_str = time_entry[:1], time_entry[2:3]
+                print(f"day_jp: {day_jp}, period_str: {period_str}")
+                period_str = period_str.strip()
+                print(period_str)
+                # period_strが空でない場合のみ処理
+                if period_str.isdigit():
+                    period = int(period_str)  # 時限を整数に変換
+                print(period)
+
+                day_en = day_en2jp.get(day_jp)
+                if day_en and str(period) in table.time_table:
+                    table.time_table[str(period)][day_en] = {
+                        "name": class_name,
+                        "teacher": teacher,
+                        "unit": unit
+                    }
+
     except json.JSONDecodeError as e:
         print("JSONDecodeError:", str(e))
         print("Returned data:", result)
-    return table
+
+    return {"time_table": table.time_table, "item": item_data}
 
 @router.post('/cell/')
 def get_courses_percell(info: Cell):

@@ -11,9 +11,9 @@ def extract_course_names(text):
     
     return course_names
 
-def pdf_to_text(pdf_path, output_txt_path=None):
+def pdf_to_text(pdf_content, output_txt_path=None):
     # PDFファイルの読み込み
-    reader = PdfReader(pdf_path)
+    reader = PdfReader(pdf_content)
     # ページの取得
     page = reader.pages[0]
     # テキストの抽出
@@ -25,7 +25,7 @@ def pdf_to_text(pdf_path, output_txt_path=None):
         # テキストをファイルに出力
         with open(output_txt_path, 'w', encoding='utf-8') as f:
             f.write(text)
-    
+
     print(f"extracted_course_names_list: {extracted_course_names_list}")
     
     # ['評価に対する得点の範囲は次のとおりです。秀：', '経営戦略特論', '思考モデリング', '暗号理論', '時系列データ解析特論', '暗号数学特論', '最適化アルゴリズム論', '機械学習特論：理論とアルゴリズム', 'マルチメディア工学特論', '人間情報システム特論']
@@ -58,7 +58,7 @@ def detect_completed_courses(user_course_names, extracted_course_names_list):
                 
     return matched_courses
 
-def identify_completed_courses_pipeline(pdf_path, csv_file):
+def identify_completed_courses_pipeline(pdf_content, csv_file):
     """
     PDFファイルとCSVファイルから授業名を抽出し、習得済みの授業を検出するパイプライン関数
     param:
@@ -78,7 +78,7 @@ def identify_completed_courses_pipeline(pdf_path, csv_file):
             user_course_names.append(row['classname'])
     
     # PDFファイルから授業名を抽出
-    extracted_course_names_list = pdf_to_text(pdf_path)
+    extracted_course_names_list = pdf_to_text(pdf_content)
     
     # 授業の一致を検出
     matched_courses = detect_completed_courses(user_course_names, extracted_course_names_list)
