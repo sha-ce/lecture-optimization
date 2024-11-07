@@ -1,24 +1,27 @@
 
 // コース選択スクリプト
+let selections = {
+    'compulsory': {'分野': ['知能情報', '情報・通信', '知的システム', '物理情報', '生命科学情報']},
+    // 'grade'     : {'学年': ['M1', 'M2', 'D1', 'D2', 'D3']},
+    'special'   : {'専門深化プログラム': [
+                    'データ科学コース', '人工知能コース', 'メディア情報学コース', 'ソフトウェアデザインコース', '情報通信ネットワークコース', 'コンピュータ工学コース',
+                    'ロボティクスコース', 'システム制御コース', '先進機械コース', '電子物理コース', '生物物理コース', '分子生命工学コース', '医用生命工学コース']},
+    'social'    : {'社会駆動プログラム': [
+                    'AI応用コース', '金融流通コース', 'ソフトウェア開発プロセスコース', '画像認識コース', 'ロボティクスシンセシス導入コース', '計算力学エンジニアコース', '大規模計算科学：基礎と実践コース',
+                    'アントレプレナーシップコース', '情報教育支援コース', '生命体工学コース', '国際エンジニアリング共同講義コース', '需要創発コース', 'マイクロ化技術実践コース', '情報工学導入コース']},
+    'quarter'   : {'クオーター': ['Q1', 'Q2', 'Q3', 'Q4']},
+}
+let select_el = document.getElementById('select');
+for (let k in selections) {
+    kjp = Object.keys(selections[k])[0];
+    select_el.insertAdjacentHTML("beforeend", `<select id="${k}"><option value="default">${kjp}</option></select>`);
+    addSelectOption(k, selections[k][kjp]);
+}
 function addSelectOption(id, options) {
     let e = document.getElementById(id);
     for (let option of options) { e.insertAdjacentHTML("beforeend", `<option value="${option}">${option}</option>`); }
-    if(localStorage.hasOwnProperty(id)) {
-        e.value = localStorage.getItem(id);
-    }
+    if(localStorage.hasOwnProperty(id)) { e.value = localStorage.getItem(id); }
 }
-addSelectOption('compulsory', ['知能情報工学科', '情報通信工学科', '知的システム工学科', '物理情報工学科', '生命科学情報工学科']);
-// addSelectOption('grade', ['M1', 'M2', 'D1', 'D2', 'D3']);
-document.getElementById('grade').style.display = 'none';
-addSelectOption('quarter', ['Q1', 'Q2', 'Q3', 'Q4']);
-addSelectOption('special', [
-    'データ科学コース', '人工知能コース', 'メディア情報学コース', 'ソフトウェアデザインコース', '情報通信ネットワークコース', 'コンピュータ工学コース',
-    'ロボティクスコース', 'システム制御コース', '先進機械コース', '電子物理コース', '生物物理コース', '分子生命工学コース', '医用生命工学コース',
-]);
-addSelectOption('social', [
-    'AI応用コース', '金融流通コース', 'ソフトウェア開発プロセスコース', '画像認識コース', 'ロボティクスシンセシス導入コース', '計算力学エンジニアコース', '大規模計算科学：基礎と実践コース',
-    'アントレプレナーシップコース', '情報教育支援コース', '生命体工学コース', '国際エンジニアリング共同講義コース', '需要創発コース', 'マイクロ化技術実践コース', '情報工学導入コース',
-]);
 
 
 
@@ -28,7 +31,7 @@ let questions = [
     {title: '授業日数は', labels: ['多い方がいい', '少ない方がいい']},
     {title: '課題の量は', labels: ['多い方がいい', 'ない方がいい']},
     {title: '履修単位数はできるだけ', labels: ['多めで', '少なめで']},
-    {title: '遠隔 or 対面', labels: ['遠隔が好き', '対面が好き']},
+    {title: '対面 or 遠隔', labels: ['対面が好き', '遠隔が好き']},
     {title: '講義を選択する時、自分の興味関心を', labels:['無視する', '優先する']},
     {title: '早朝の授業はなるべく', labels: ['多く受けたい', '受けたくない']},
     {title: '試験のある授業は', labels: ['大好き', '大嫌い']},

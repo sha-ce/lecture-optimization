@@ -23,31 +23,27 @@ new Promise((resolve, reject) => {
       resolve();
     }, 10);
 }).then(() => {
-    get();
+    let data = {
+        compulsory: localStorage.getItem('compulsory'),
+        quarter: localStorage.getItem('quarter').replace('Q', ''),
+        special: localStorage.getItem('special'),
+        social: localStorage.getItem('social'),
+        alphas: localStorage.getItem('alphas').split(',').map(Number),
+        l_early: localStorage.getItem('l_early'),
+        units: localStorage.getItem('units').split(',').map(Number),
+        keywords: localStorage.getItem('keywords'),
+        // pdf_file_path: '',
+    }
+    get(data);
 });
 
-const url = BASE_URL+'optimizer/only-items/';
-const config = {method: "GET", headers: {"Content-Type": "application/json"}}
-fetch(url, config)
-.then(response => { return response.json(); })
-.then(res => {
-    let selected_conditions = document.getElementById('selected-conditions');
-    let conditions_code = `
-        <p>学科　　　　　　　　: ${res['compulsory']}</p>
-        <p>専門深化プログラム　: ${res['special']}</p>
-        <p>社会駆動プログラム　: ${res['social']}</p>
-        <p>クオーター　　　　　: ${res['quarter']}</p>
-    `;
-    selected_conditions.insertAdjacentHTML("beforeend", conditions_code);
-})
-.catch(e  => {alert(e); return false; })
-
-//     compulsory: str
-//     grade: str
-//     quarter: str
-//     special: str
-//     social: str
-//     alphas: list
-//     l_early: str
-//     units: list
-//     keywords: list
+let selected_conditions = document.getElementById('selected-conditions');
+let conditions_code = `
+    <div class="hover-up">
+    <p>分野　　　　　　　　: ${localStorage.getItem('compulsory')}</p>
+    <p>専門深化プログラム　: ${localStorage.getItem('special')}</p>
+    <p>社会駆動プログラム　: ${localStorage.getItem('social')}</p>
+    <p>クオーター　　　　　: ${localStorage.getItem('quarter')}</p>
+    </div>
+`;
+selected_conditions.insertAdjacentHTML("beforeend", conditions_code);

@@ -22,10 +22,13 @@ def parse_times(schedule):
     """
     return re.findall(r'[月火水木金土日]曜\d限', schedule)
 
-def optimize_classes(alpha_values, data_path='data.csv', L_early=0, min_units=1, max_units=float('inf'), keywords="", pdf_content=None):
+def optimize_classes(alpha_values, data_path='data.csv', quarter=1, L_early=0, min_units=1, max_units=float('inf'), keywords="", pdf_content=None):
     
     # データ読み込み
     df = pd.read_csv(data_path)
+
+    # 開講クオーターの制限
+    df = df[df['semester']==quarter]
 
     # PDFファイルから習得済みの授業を抽出
     if pdf_content is not None:

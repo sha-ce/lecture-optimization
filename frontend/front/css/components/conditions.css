@@ -121,17 +121,3 @@
 .res-phone {
     display: none;
 }
-
-
-
-/* after selection */
-#selected-conditions {
-    font-size: 0.8rem;
-    display: block;
-}
-#selected-conditions p {
-    padding: 5px;
-    color: #555;
-    border: none;
-    text-align: left;
-}

@@ -41,11 +41,34 @@
         width: 40vw;
         display: inline-block;
     }
+
+    .cell .course li {
+        font-size: 0.7rem;
+    }
     
 }
 
 @media screen and (max-width: 480px) { /* phone */
     .rating-group .circle-2, .rating-group .circle-4 {
         display: none;
+    }
+    .cell .course li {
+        font-size: 0.5rem;
+    }
+    .dialog-content {
+        width: 98%;
+        /* height: 500px; */
+        position: absolute;
+        top: 70px;
+        right: 5px;
+        border-radius: 10px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        padding: 20px 0;
+    }
+    .chat-window {
+        margin: 10px 5px;
+        padding: 20px;
+        height: 300px; /* 固定の高さを設定 */
+        max-height: 300px;
     }
 }

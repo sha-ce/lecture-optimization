@@ -52,7 +52,7 @@
     transition: 0.3s;
 }
 
-.cell .course {
+.course {
     background-color: #fff;
     font-size: 0.6rem;
     padding: 5px;
@@ -62,13 +62,13 @@
     height: 100%;
     box-shadow: 1px 1px 0 rgba(0, 0, 0, 0.1);
 }
-.cell .course:hover {
+.course:hover {
     box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.1);
     transition: 0.3s;
     cursor: pointer;
 }
 
-.cell .course ul li {
+.course ul li {
     color: #555;
     list-style: none;
 }
@@ -77,4 +77,35 @@
     padding: 30px 2px;
     font-size: 0.8rem;
     width: 1vw;
+}
+
+/* after selection */
+#selected-conditions {
+    text-align: right;
+    font-size: 0.8rem;
+    display:inline-block
+}
+#selected-conditions p {
+    padding: 5px;
+    color: #555;
+    border: none;
+    text-align: left;
+}
+.hover-up {
+    display: none;
+    padding: 20px;
+}
+#selected-conditions:hover {
+    cursor: pointer;
+    transition: 0.5s;
+    .hover-up {
+        transition: 0.3s;
+        display: block;
+        position: fixed;
+        z-index: 99;
+        background-color: #fff;
+        box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.1);
+        top: 100px;
+        left: min(300px, 1%);
+    }
 }

@@ -1,0 +1,106 @@
+
+.dialog-content {
+    display: none;
+    background-color: #fff;
+    width: min(440px, 80%);
+    /* height: 500px; */
+    position: fixed;
+    top: 100px;
+    right: 5px;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    padding: 20px 0;
+}
+.dialog-close {
+    position: absolute;
+    background: none;
+    top: 10px;
+    right: 10px;
+}
+
+  
+/* チャットウィンドウ */
+.chat-window {
+    flex: 1;
+    margin: 10px 5px;
+    padding: 20px;
+    background-color: #fff;
+    overflow-y: auto;
+    height: 500px; /* 固定の高さを設定 */
+    max-height: 500px;
+    display: flex;
+    flex-direction: column;
+    border: solid 1px #eee;
+    border-radius: 5px;
+}
+.message {
+    font-size: 0.8rem;
+    padding: 5px 10px;
+    border-radius: 20px;
+    margin-bottom: 10px;
+    max-width: 75%;
+    clear: both;
+    white-space: normal;          /* テキストを折り返す */
+    overflow-wrap: break-word;    /* 長い単語がある場合も改行 */
+    line-height: 1.4;             /* 行間を少し広げて見やすく */
+}
+.message.user {
+    background: none;
+    border: solid 1px #eee;
+    align-self: flex-end;
+    text-align: right;
+    margin-left: auto;
+}
+.message.bot {
+    background-color: #e2e3e5;
+    align-self: flex-start;
+    text-align: left;
+    margin-right: auto;
+}
+  
+/* タイピングアニメーション */
+.message.typing::after {
+    content: "・";
+    animation: typing 1s steps(1) infinite;
+}
+@keyframes typing {
+    0%, 100% { content: "・"; }
+    50% { content: "・・"; }
+    75% { content: "・・・"; }
+}
+.input-area {
+    display: flex;
+    align-items: center;
+    background: none; /* 背景色をダークグレーに */
+    padding: 2px 15px;
+    border: 1px solid #eee;
+    border-radius: 30px; /* 両端を丸くする */
+    max-width: 600px;
+    margin: 2px;
+    color: #ccc; /* テキストの色 */
+}
+#chat-input {
+    background: none;
+    flex: 1;
+    padding: 15px;
+    border: none;
+    outline: none;
+    font-size: 0.8rem;
+}
+#send-button {
+    background: none;
+    border: none;
+    color: #ccc;
+    cursor: pointer;
+    font-size: 16px;
+    padding: 8px;
+    border-radius: 50%;
+}
+#send-button:hover {
+    background-color: #eee;
+    transition: 0.3s;
+}
+#send-button:active {
+    transform: scale(0.8);
+    transition: 0.1s;
+}

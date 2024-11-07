@@ -83,7 +83,7 @@ select:hover {
     display: block;
 }
 .container {
-    width: min(1000px, 98%);
+    width: min(1000px, 100%);
     background-color: #fff;
     margin-bottom: 50px;
     padding: 50px;

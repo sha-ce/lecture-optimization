@@ -3,8 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0">
     <title>講義選択最適化</title>
     <link rel="stylesheet" href="../css/styles.css">
+    <script src="https://kit.fontawesome.com/0fcff45f50.js" crossorigin="anonymous"></script>
 </head>
 <body id="popup-others">
     <div class="header">
@@ -13,6 +15,8 @@
 
     <div class="container-wrapper">
         <div class="container">
+            <button id="selected-conditions" class="submit">your info</button>
+            <button id="chat" class="submit" onclick="openCloseChat()">dialogue</button>
             <h1>時間割</h1>
 
             <div id="antiload">
@@ -29,18 +33,29 @@
                 </button>
             </div> -->
         </div>
-        <div class="container"><div id="selected-conditions"></div></div>
     </div>
 
     <div id="popup-window" class="popup">
         <div class="popup-content">
           <button id="close-popup-window" class="close" onclick="hidePopup()">×</button>
-          <p>Some text in the Modal..</p>
           <div id="popup-classes"></div>
+          <div class="button-wrapper"><button type="submit" id="submit" class="submit popup-button" onclick="setLecture()">登録</button></div>
         </div>
+    </div>
+
+    <div id="dialog" class="dialog-content" style="display: none;">
+        <h1>LLM Dialogue</h1>
+        <div class="chat-window" id="chat-window"></div>
+        <div class="input-area">
+            <input type="text" id="chat-input" placeholder="メッセージを入力してください..." />
+            <button id="send-button"><i class="fa-regular fa-paper-plane"></i></button>
+        </div>
+        <div class="button-wrapper"><button type="submit" id="submit" class="submit" onclick="reOptimize()">reoptimize</button></div>
+        <button id="close-dialog-window" class="close dialog-close" onclick="closeChat()">×</button>
     </div>
 
     <script src="../js/script.js"></script>
     <script src="../js/active_table.js"></script>
+    <script src="../js/chat.js"></script>
 </body>
 </html>

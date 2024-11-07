@@ -14,19 +14,10 @@
         <h1>講義選択最適化</h1>
     </div>
     <div class="container">
-        <!-- <input type="text" id="ip" placeholder="server IP address"><button id="sub" class="submit" onclick="setIP()">set IP</button>
-        <form class="form"> -->
             <!-- コース選択 -->
             <div id="question-cource-select">
                 <header><h2>コース選択</h2><p>各項目に対してあなたに該当するラベルを選択してください</p></header>
-                <div class="select">
-                    <select id="compulsory"><option value="default">学科</option></select>
-                    <select id="grade"><option value="default">学年</option></select>
-                    <select id="special"><option value="default">専門深化プログラム</option></select>
-                    <select id="social"><option value="default">社会駆動プログラム</option></select>
-                    <select id="quarter"><option value="default">クオーター</option></select>
-                </div>
-                <!-- <div class="button-wrapper"><button class="arrow" onclick="toConditions()"><i class="fa-solid fa-chevron-right"></i></button></div> -->
+                <div class="select" id="select"></div>
             </div>
 
             <!-- 条件選択 -->
@@ -54,9 +45,18 @@
                 <header><h2>キーワード選択</h2><p>あなたの興味のある分野を選択してください。（複数選択可）</p></header>
                 <div class="keywords" id="keywords"></div>
             </div>
+
+            <!-- 既習得単位のpdfファイル選択 -->
+            <div id="question-keywords-select">
+                <header><h2>成績通知書アップロード</h2><p>
+                    既習得科目を明示的に与え、最適化される講義が重複するのを防ぎます。（アップロードをしなくても構いません。）<br>
+                    ”LiveCanpas＞学修ポートフォリオ＞成績ダッシュボード＞成績情報詳細＞成績通知書印刷” でダウンロードできるpdfファイルをアップロードしてください。<br>
+                    </p></header>
+                <input type="file" id="pdf-input"/>
+            </div>
             
         </form>
-        <div class="button-wrapper"><button type="submit" id="submit" class="submit" onclick="post()">submit</button></div>
+        <div class="button-wrapper"><button type="submit" id="submit" class="submit" onclick="postToLocal()">submit</button></div>
     </div>
     <script src="./front/js/script.js"></script>
     <script src="./front/js/active_index.js"></script>

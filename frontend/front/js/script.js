@@ -1,6 +1,7 @@
 
 const CURRENT_URL = window.location.href.split('/');
-const BASE_URL = `${CURRENT_URL[0]}//${CURRENT_URL[2].split(':')[0]}:8080/`
+const BASE_URL = `${CURRENT_URL[0]}//${CURRENT_URL[2].split(':')[0]}:8080/`;
+// const BASE_URL = 'http://0.0.0.0:8080/';
 
 function getItemfromId(id) {
     val = document.getElementById(id).value;
@@ -9,7 +10,7 @@ function getItemfromId(id) {
 }
 function getDatafromForm() {
     const compulsory = getItemfromId('compulsory');
-    const grade = getItemfromId('grade');
+    // const grade = getItemfromId('grade');
     const quarter = getItemfromId('quarter');
     const special = getItemfromId('special');
     const social = getItemfromId('social');
@@ -35,15 +36,15 @@ function getDatafromForm() {
         document.getElementById('max-units').value,
     ];
 
-    const selected_keywords = [];
+    var selected_keywords = '';
     for (let i=0; i<keywords.length; i++) {
         let el = document.getElementById('key'+String(i));
-        if (el.checked) { selected_keywords.push(el.value); }
+        if (el.checked) { selected_keywords += `${el.value}, `; }
     }
 
     return {
         compulsory: compulsory,
-        grade: grade,
+        // grade: grade,
         quarter: quarter,
         special: special,
         social: social,
@@ -53,43 +54,51 @@ function getDatafromForm() {
         keywords: selected_keywords,
     };
 }
-function post(local=false) {
+function postToLocal() {
     let data = getDatafromForm();
-    
-    if (local) {
-        window.location.assign('./front/pages/table.html');
-        return false
-    }
+    for (let k in data) { localStorage.setItem(k, data[k]); }
 
-    const url = BASE_URL+'optimizer/conditions/';
-    const config = {
-        method: "POST",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify(data),
+    const file = document.getElementById("pdf-input").files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(event) {
+            const base64Data = event.target.result;
+            localStorage.setItem("pdfFile", base64Data);
+        };
+        reader.readAsDataURL(file);
+    } else {
+        localStorage.setItem("pdfFile", null);
     }
-    fetch(url, config)
-    .then(data => { return data.json(); })
-    .then(res  => {
-        window.location.assign('./front/pages/table.html');
-    })
-    .catch(e   => {
-        alert(e);
-        return false
-    })
+    window.location.assign('./front/pages/table.html');
 };
 
-function get() {
+function get(data) {
     const url = BASE_URL+'optimizer/items/';
-    const config = {
-        method: "GET",
-        headers: {"Content-Type": "application/json"},
+    let body = new FormData();
+    body.append('item', String(JSON.stringify(data)));
+
+    const pdfFile = localStorage.getItem('pdfFile');
+    if (pdfFile != 'null') {
+        const binaryString = atob(pdfFile.split(",")[1]);
+        const bytes = new Uint8Array(binaryString.length);
+        for (let i = 0; i < binaryString.length; i++) { bytes[i] = binaryString.charCodeAt(i); }
+        const blob = new Blob([bytes], { type: "application/pdf" });
+        body.append('pdf_file', blob);
+    } else {
+        body.append('pdf_file', new Blob([], { type: "application/pdf" }));
     }
-    
+
+    const config = {
+        method: "POST",
+        body: body
+    }
+
     fetch(url, config)
     .then(response => { return response.json(); })
     .then(res => {
         loaded();
-        fill(res.time_table);
+        if (res == '制約が厳しすぎます。') { alert('制約が厳しすぎます。各種パラメータを再調整してください。'); }
+        else { fill(res.time_table); }
     })
     .catch(e  => {
         alert(e);
@@ -111,7 +120,10 @@ function fill(table) {
             let el = document.getElementById(`${day}-${i}`);
             initTable(el.children);
             if (c != null) {
-                let incode = '<div class="course"><ul><li>'+c.name+'</li><li>'+c.teacher+'</li><li>'+String(c.unit)+'単位</li></ul></div>'
+                let incode = `
+                    <div id="${day}-${i}-course" class="course" onclick="popup(this)">
+                    <ul><li>${c.name}</li><li>${c.teacher}</li><li>${String(c.unit)} 単位</li></ul>
+                    </div>`
                 el.insertAdjacentHTML("afterbegin", incode);
             }
         }
@@ -134,11 +146,36 @@ function loaded() {
 
 
 // popup
+function isinCell(day, time) {
+    let act_course_el = document.getElementById(`${day}-${time}-course`);
+    if (act_course_el == null) { return false; } else {
+        return act_course_el.firstElementChild.firstElementChild.textContent;
+    }
+}
 function removeCand() { document.getElementById('classes-wrapper').remove(); }
-function setCand(classes) {
+function setCand(classes, [day, time]) {
     let popclass_el = document.getElementById('popup-classes');
-    let inline = `<div id="classes-wrapper" class="">`;
-    for (let c of classes) { inline += `<div class="">${c.classname}</div>`; }
+    let inline = `
+        <div id="classes-wrapper">
+        <p value="${day}-${time}">
+            ${localStorage.getItem('quarter')},
+            ${{'mon': '月曜', 'tue': '火曜', 'wed': '水曜', 'thu': '木曜', 'fri': '金曜'}[day]} 
+            ${time}限
+        </p>
+    `;
+    let active_class = isinCell(day, time);
+    if (!active_class) {inline += 'stage<div class="border"></div>'; }
+    let inline_ = '';
+    for (let c of classes) {
+        if (active_class && active_class == c.classname) {
+            inline += `<button class="course popup-course" onclick="outStage(this)">
+                       <ul><li>${c.classname}</li><li>${c.teacher}</li><li>${c.numofunits} 単位</li></ul>
+                       </button>stage<div class="border"></div>`;
+            continue;
+        }
+        inline_ += `<button class="course popup-course" onclick="onStage(this)"><ul><li>${c.classname}</li><li>${c.teacher}</li><li>${c.numofunits} 単位</li></ul></button>`;
+    }
+    inline += inline_;
     popclass_el.insertAdjacentHTML("beforeend", `${inline}</div>`);
 }
 function popup(cell) {
@@ -157,7 +194,7 @@ function popup(cell) {
     fetch(url, config)
     .then(data => { return data.json(); })
     .then(res  => {
-        setCand(JSON.parse(res)['data']);
+        setCand(JSON.parse(res)['data'], cell.parentNode.id.split('-'));
     })
     .catch(e   => {
         alert(e);
@@ -171,4 +208,56 @@ function hidePopup() {
 window.onclick = function(event) {
     const popwin = document.getElementById('popup-window');
     if (event.target == popwin) { popwin.style.display = "none"; removeCand(); }
+}
+
+// 講義登録
+function onStage(e) {
+    let children = e.parentNode.children;
+    let toStageid = null;
+    for (let i=0; i<children.length; i++) { if (children[i] == e) {toStageid = i;} }
+    if (children[2].tagName == 'DIV') {
+        let p0 = children[1].querySelector('ul');
+        let p1 = children[toStageid].querySelector('ul');
+        children[1].replaceChild(p1, p0);
+        children[toStageid].appendChild(p0);
+    } else {
+        let ts = children[toStageid].querySelector('ul').children;
+        children[toStageid].remove();
+        let incode = `
+            <button class="course popup-course" onclick="outStage(this)">
+            <ul><li>${ts[0].textContent}</li><li>${ts[1].textContent}</li><li>${ts[2].textContent}</li></ul>
+            </button>`;
+        children[0].insertAdjacentHTML("afterend", incode);
+    }
+}
+function outStage(e) {
+    let children = e.parentNode.children;
+    es = e.querySelector('ul').children;
+    e.remove();
+    let incode = `
+        <button class="course popup-course" onclick="onStage(this)">
+        <ul><li>${es[0].textContent}</li><li>${es[1].textContent}</li><li>${es[2].textContent}</li></ul>
+        </button>`;
+    children[1].insertAdjacentHTML("afterend", incode);
+}
+function setLecture() {
+    let e = document.getElementById('classes-wrapper');
+    let daytime = e.children[0].getAttribute('value');
+    let lec_e = document.getElementById(`${daytime}-course`);
+    if (lec_e != null) {
+        if (e.children[1].tagName == 'BUTTON') { lec_e.replaceChild(e.children[1].querySelector('ul'), lec_e.querySelector('ul')); hidePopup();}
+        else { lec_e.remove(); hidePopup(); }
+    } else {
+        if (e.children[1].tagName == 'BUTTON') {
+            let cell_e = document.getElementById(daytime);
+            let es = e.children[1].querySelector('ul').children;
+            let incode = `
+                <div id="${daytime}-course" class="course" onclick="popup(this)">
+                <ul><li>${es[0].textContent}</li><li>${es[1].textContent}</li><li>${es[2].textContent}</li></ul>
+                </div>`
+            cell_e.insertAdjacentHTML("afterbegin", incode);
+            hidePopup();
+        }
+        else { hidePopup(); }
+    }
 }

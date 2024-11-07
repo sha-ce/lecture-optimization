@@ -48,3 +48,24 @@
     cursor: pointer;
     transition: 0.3s;
 }
+
+#classes-wrapper {
+    width: 100%;
+}
+#classes-wrapper p {
+    padding-bottom: 50px;
+}
+
+.popup-course {
+    margin: 10px 0;
+    padding: 5px;
+    border: none;
+    font-size: 0.8rem;
+}
+
+.border {
+    height: 1px;
+    width: min(900px, 100%);
+    margin: 2px auto 30px auto;
+    border: solid 1px gray;
+}
