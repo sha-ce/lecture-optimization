@@ -1,5 +1,5 @@
 from fastapi import APIRouter, File, UploadFile, Form
-from models import Item, Table, Cell
+from models import Item, Cell
 import json
 import pandas as pd
 from classnavi.utils.optimizer import optimize_classes
@@ -13,7 +13,7 @@ router = APIRouter(prefix="/optimizer", tags=["optimizer"])
 @router.post("/items/")
 async def get_items(item: str = Form(...), pdf_file: Optional[UploadFile] = File(None)):
     item_data = json.loads(item)
-    print(item_data)
+    # print(item_data)
 
     if pdf_file:
         content = await pdf_file.read()
@@ -30,30 +30,13 @@ async def get_items(item: str = Form(...), pdf_file: Optional[UploadFile] = File
         pdf_content=None
     )
 
-    days = {'月曜': 'mon', '火曜': 'tue', '水曜': 'wed', '木曜': 'thu', '金曜': 'fri'}
-    times = {'１限': '1', '２限': '2', '３限': '3', '４限': '4', '５限': '5', '６限': '6'}
-    day_time_dict = {d_jp+t_jp: [d_en, t_en] for d_jp, d_en in days.items() for t_jp, t_en in times.items()}
-    table = Table()
-
     try:
         result_data = json.loads(result)
-        print(result_data)
-        if isinstance(result_data, dict):
-            return result_data['message']
-        
-        for entry in result_data:
-            class_name = entry['classname']
-            teacher = entry['teacher']
-            unit = entry['numofunits']
-            daytimes = entry['when'].split('・')
-
-            for daytime in daytimes:
-                day, time = day_time_dict[daytime]
-                table.time_table[time][day] = {'name': class_name, 'teacher': teacher, 'unit': unit}
+        # print(result_data)
     except json.JSONDecodeError as e:
         print("JSONDecodeError:", str(e))
         print("Returned data:", result)
-    return table
+    return result_data
 
 @router.post('/cell/')
 def get_courses_percell(info: Cell):
