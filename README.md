@@ -57,7 +57,7 @@ llmのAPIのリクエストボディは以下のような形式で入力．
 ```
 
 ## frontend
-[demo動画](./frontend/demo.gif)
+[demo動画](./frontend/demo.mp4)
 - 条件など諸項目選択ページ[`index.html`](./frontend/index.html)
   - コース選択
   - 条件選択
