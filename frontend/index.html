@@ -48,11 +48,16 @@
 
             <!-- 既習得単位のpdfファイル選択 -->
             <div id="question-keywords-select">
-                <header><h2>成績通知書アップロード</h2><p>
-                    既習得科目を明示的に与え、最適化される講義が重複するのを防ぎます。（アップロードをしなくても構いません。）<br>
-                    ”LiveCanpas＞学修ポートフォリオ＞成績ダッシュボード＞成績情報詳細＞成績通知書印刷” でダウンロードできるpdfファイルをアップロードしてください。<br>
-                    </p></header>
-                <input type="file" id="pdf-input"/>
+                <header><h2>成績通知書</h2>
+                    <p>習得済みの科目を除外します。(アップロードしなくてもいいです。)<br>
+                    <small>( <a href="https://virginia.jimu.kyutech.ac.jp/lcu-web/">LiveCanpas</a>＞学修ポートフォリオ＞成績ダッシュボード＞成績情報詳細＞成績通知書印刷 )</small></p>
+                </header>
+                <!-- ドラッグ＆ドロップエリアとファイル選択ボタン -->
+                <div class="drop-zone" id="drop-zone">
+                    <p>PDFファイルをドラッグ＆ドロップ、またはクリックして選択</p>
+                    <div id="preview" style="display: none;"></div>
+                </div>
+                <input type="file" id="pdf-input" class="file-input" accept=".pdf">
             </div>
             
         </form>

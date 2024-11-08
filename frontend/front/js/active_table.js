@@ -37,13 +37,48 @@ new Promise((resolve, reject) => {
     get(data);
 });
 
-let selected_conditions = document.getElementById('selected-conditions');
-let conditions_code = `
-    <div class="hover-up">
-    <p>分野　　　　　　　　: ${localStorage.getItem('compulsory')}</p>
-    <p>専門深化プログラム　: ${localStorage.getItem('special')}</p>
-    <p>社会駆動プログラム　: ${localStorage.getItem('social')}</p>
-    <p>クオーター　　　　　: ${localStorage.getItem('quarter')}</p>
-    </div>
-`;
-selected_conditions.insertAdjacentHTML("beforeend", conditions_code);
+setInfo();
+function setInfo() {
+    let selected_conditions = document.getElementById('your-info');
+    while(selected_conditions.firstChild){ selected_conditions.removeChild( selected_conditions.firstChild ); }
+
+    let units = localStorage.getItem('units').split(',').map(Number);
+    let a = localStorage.getItem('alphas').split(',').map(Number);
+    let astr = '';
+    s =  [
+        ['授業日数 ', 'どうでもいい', '少なめ', '多め'],
+        ['課題の量 ', 'どうでもいい', '少なめ', '多め'],
+        ['単位数 ', 'どうでもいい', '少なめ', '多め'],
+        ['対面か遠隔 ', 'どっちでもいい', '→ 対面', '→ 遠隔'],
+        ['興味関心 ', 'そんなの知らん', '無視する', '優先する'],
+        ['朝は ', '弱くも強くもない', '強い', '弱い'],
+        ['試験 ', '無関心', '大好き', '大嫌い'],
+    ];
+    for (let i=0; i<s.length; i++) { astr += `<p>${s[i][0]} ` + ((a[i]==0)?`${s[i][1]}（${a[i]}）`:(a[i]>0)?`${s[i][2]}（${a[i]}）`:`${s[i][3]}（${-a[i]}）`)+`</p>`; }
+
+    let conditions_code = `
+        <h3>Course</h3>
+        <p>分野　　　　　　　　: ${localStorage.getItem('compulsory')}</p>
+        <p>専門深化プログラム　: ${localStorage.getItem('special')}</p>
+        <p>社会駆動プログラム　: ${localStorage.getItem('social')}</p>
+        <p>クオーター　　　　　: ${localStorage.getItem('quarter')}</p>
+        <h3>Conditions</h3>${astr}
+        <p>授業は ${localStorage.getItem('l_early')}限以降に入れたい</p>
+        <p>単位数 ${units[0]} 単位以上, ${units[1]} 単位以下</p>
+        <h3>Keywords</h3>
+        <p>${localStorage.getItem('keywords')}</p>
+        <div class="button-wrapper">
+        <button type="submit" id="submit" class="submit" onclick="window.location.assign('../../');">re-parameterize</button>
+        </div>
+    `;
+    selected_conditions.insertAdjacentHTML("beforeend", conditions_code);
+}
+
+
+document.getElementById('your-info').style.display = 'none';
+document.getElementById('selected-conditions').setAttribute('onclick', 'openCloseInfo()');
+function openCloseInfo() {
+    let estyle = document.getElementById('your-info').style;
+    if (estyle == null || estyle.display == 'none') { document.getElementById('your-info').style.display='block'; }
+    else { document.getElementById('your-info').style.display = 'none'; }
+}

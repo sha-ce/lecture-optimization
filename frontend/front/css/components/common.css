@@ -31,6 +31,11 @@ h2 {
     color: #555;
     padding-top: min(80px, 10vh);
 }
+h3 {
+    text-align: center;
+    font-size: 1.1rem;
+    color: #555;
+}
 p {
     font-size: 0.8rem;
     text-align: center;

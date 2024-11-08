@@ -80,32 +80,36 @@
 }
 
 /* after selection */
-#selected-conditions {
-    text-align: right;
-    font-size: 0.8rem;
-    display:inline-block
+#your-info {
+    display: none;
+    background-color: #fff;
+    width: min(335px, 80%);
+    position: fixed;
+    top: 100px;
+    left: min(300px, 1%);
+    border-radius: 10px;
+    box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    overflow-y: auto;
+    height: 61vh;
+    transition: 0.3s;
+    z-index: 99;
 }
-#selected-conditions p {
+#your-info p {
     padding: 5px;
     color: #555;
     border: none;
     text-align: left;
 }
-.hover-up {
-    display: none;
-    padding: 20px;
+#selected-conditions {
+    text-align: right;
+    font-size: 0.8rem;
+    display:inline-block
 }
-#selected-conditions:hover {
-    cursor: pointer;
-    transition: 0.5s;
-    .hover-up {
+/* #selected-conditions:hover {
+    #your-info {
         transition: 0.3s;
         display: block;
-        position: fixed;
         z-index: 99;
-        background-color: #fff;
-        box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.1);
-        top: 100px;
-        left: min(300px, 1%);
     }
-}
+} */

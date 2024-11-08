@@ -56,20 +56,22 @@ function getDatafromForm() {
 }
 function postToLocal() {
     let data = getDatafromForm();
-    for (let k in data) { localStorage.setItem(k, data[k]); }
+    if (data) {
+        for (let k in data) { localStorage.setItem(k, data[k]); }
 
-    const file = document.getElementById("pdf-input").files[0];
-    if (file) {
-        const reader = new FileReader();
-        reader.onload = function(event) {
-            const base64Data = event.target.result;
-            localStorage.setItem("pdfFile", base64Data);
-        };
-        reader.readAsDataURL(file);
-    } else {
-        localStorage.setItem("pdfFile", null);
+        const file = document.getElementById("pdf-input").files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const base64Data = event.target.result;
+                localStorage.setItem("pdfFile", base64Data);
+            };
+            reader.readAsDataURL(file);
+        } else {
+            localStorage.setItem("pdfFile", null);
+        }
+        window.location.assign('./front/pages/table.html');
     }
-    window.location.assign('./front/pages/table.html');
 };
 
 function get(data) {
@@ -97,8 +99,11 @@ function get(data) {
     .then(response => { return response.json(); })
     .then(res => {
         loaded();
-        if (res == '制約が厳しすぎます。') { alert('制約が厳しすぎます。各種パラメータを再調整してください。'); }
-        else { fill(res.time_table); }
+        if (!Array.isArray(res)) { alert('制約が厳しすぎます。各種パラメータを再調整してください。'); }
+        else {
+            setLocalClasses('table', res);
+            fill();
+        }
     })
     .catch(e  => {
         alert(e);
@@ -107,27 +112,43 @@ function get(data) {
     })
 };
 
-function initTable(e) {
-    if (e.length > 1) {
-        e[0].remove();
+
+function setLocalClasses(key, classes) {
+    let days = {'月曜': 'mon', '火曜': 'tue', '水曜': 'wed', '木曜': 'thu', '金曜': 'fri'}
+    let times = {'１限': '1', '２限': '2', '３限': '3', '４限': '4', '５限': '5', '６限': '6'}
+    const day_time_dict = new Object();
+    for (let [d_jp,d_en] of Object.entries(days)) {for (let [t_jp,t_en] of Object.entries(times)) { day_time_dict[`${d_jp}${t_jp}`]=`${d_en}-${t_en}`; }}
+
+    let new_res = {};
+    for (let c of classes) {
+        let whenid = [];
+        for (let daytime of c.when.split('・')) { whenid.push(day_time_dict[daytime]); }
+        c.whenid = whenid;
+        new_res[c.classname] = c;
     }
+    localStorage.setItem(key, JSON.stringify(new_res));
 }
 
-function fill(table) {
-    for (let i of ['1', '2', '3', '4', '5', '6']) {
-        for (let day of ['mon', 'tue', 'wed', 'thu', 'fri']) {
-            let c = table[i][day];
-            let el = document.getElementById(`${day}-${i}`);
-            initTable(el.children);
-            if (c != null) {
-                let incode = `
-                    <div id="${day}-${i}-course" class="course" onclick="popup(this)">
-                    <ul><li>${c.name}</li><li>${c.teacher}</li><li>${String(c.unit)} 単位</li></ul>
-                    </div>`
-                el.insertAdjacentHTML("afterbegin", incode);
-            }
-        }
-    }
+function initTable() {
+    let days = ['mon', 'tue', 'wed', 'thu', 'fri'];
+    let times = ['1', '2', '3', '4', '5', '6'];
+    for (let day of days) { for (let time of times) {
+        let el = document.getElementById(`${day}-${time}`);
+        initCell(el.children);
+    }}
+}
+function initCell(e) { if(e.length > 1){ e[0].remove(); }}
+function fill() {
+    initTable()
+    let classes = JSON.parse(localStorage.getItem('table'));
+    for (let [_,c] of Object.entries(classes)) { for (let id of c.whenid) {
+        let el = document.getElementById(id);
+        let incode = `
+            <div id="${id}-course" class="course" onclick="popup(this)">
+            <ul><li>${c.classname}</li><li>${c.teacher}</li><li>${String(c.numofunits)} 単位</li></ul>
+            </div>`
+        el.insertAdjacentHTML("afterbegin", incode);
+    }}
 };
 
 //loading
@@ -154,6 +175,8 @@ function isinCell(day, time) {
 }
 function removeCand() { document.getElementById('classes-wrapper').remove(); }
 function setCand(classes, [day, time]) {
+    setLocalClasses('candidates', classes);
+
     let popclass_el = document.getElementById('popup-classes');
     let inline = `
         <div id="classes-wrapper">
@@ -169,15 +192,24 @@ function setCand(classes, [day, time]) {
     for (let c of classes) {
         if (active_class && active_class == c.classname) {
             inline += `<button class="course popup-course" onclick="outStage(this)">
-                       <ul><li>${c.classname}</li><li>${c.teacher}</li><li>${c.numofunits} 単位</li></ul>
+                       <ul><li>${c.classname}</li><li>${c.teacher}</li><li>${c.numofunits} 単位</li><li>${c.when}</li></ul>
                        </button>stage<div class="border"></div>`;
             continue;
         }
-        inline_ += `<button class="course popup-course" onclick="onStage(this)"><ul><li>${c.classname}</li><li>${c.teacher}</li><li>${c.numofunits} 単位</li></ul></button>`;
+        inline_ += `<button class="course popup-course" onclick="onStage(this)">
+                    <ul><li>${c.classname}</li><li>${c.teacher}</li><li>${c.numofunits} 単位</li><li>${c.when}</li></ul>
+                    </button>`;
     }
     inline += inline_;
     popclass_el.insertAdjacentHTML("beforeend", `${inline}</div>`);
 }
+function getFillDaytimes(table) {
+    let filldaytimes = new Object();
+    for (let [_, c] of Object.entries(table)) { for (let daytime of c.whenid) { filldaytimes[`${daytime}`] = ''; }}
+    return filldaytimes
+}
+
+// popup
 function popup(cell) {
     document.getElementById('popup-window').style.display = 'block';
 
@@ -223,41 +255,50 @@ function onStage(e) {
     } else {
         let ts = children[toStageid].querySelector('ul').children;
         children[toStageid].remove();
-        let incode = `
-            <button class="course popup-course" onclick="outStage(this)">
-            <ul><li>${ts[0].textContent}</li><li>${ts[1].textContent}</li><li>${ts[2].textContent}</li></ul>
-            </button>`;
-        children[0].insertAdjacentHTML("afterend", incode);
+        let incode = `<button class="course popup-course" onclick="outStage(this)"><ul>`;
+        for (let i=0; i<ts.length; i++) { incode += `<li>${ts[i].textContent}</li>` }
+        children[0].insertAdjacentHTML("afterend", `${incode}</ul></button>`);
     }
 }
 function outStage(e) {
     let children = e.parentNode.children;
     es = e.querySelector('ul').children;
     e.remove();
-    let incode = `
-        <button class="course popup-course" onclick="onStage(this)">
-        <ul><li>${es[0].textContent}</li><li>${es[1].textContent}</li><li>${es[2].textContent}</li></ul>
-        </button>`;
-    children[1].insertAdjacentHTML("afterend", incode);
+    let incode = `<button class="course popup-course" onclick="onStage(this)"><ul>`;
+    for (let i=0; i<es.length; i++) { incode += `<li>${es[i].textContent}</li>` }
+    children[1].insertAdjacentHTML("afterend", `${incode}</ul></button>`);
 }
 function setLecture() {
-    let e = document.getElementById('classes-wrapper');
-    let daytime = e.children[0].getAttribute('value');
-    let lec_e = document.getElementById(`${daytime}-course`);
-    if (lec_e != null) {
-        if (e.children[1].tagName == 'BUTTON') { lec_e.replaceChild(e.children[1].querySelector('ul'), lec_e.querySelector('ul')); hidePopup();}
-        else { lec_e.remove(); hidePopup(); }
-    } else {
-        if (e.children[1].tagName == 'BUTTON') {
-            let cell_e = document.getElementById(daytime);
-            let es = e.children[1].querySelector('ul').children;
-            let incode = `
-                <div id="${daytime}-course" class="course" onclick="popup(this)">
-                <ul><li>${es[0].textContent}</li><li>${es[1].textContent}</li><li>${es[2].textContent}</li></ul>
-                </div>`
-            cell_e.insertAdjacentHTML("afterbegin", incode);
-            hidePopup();
-        }
-        else { hidePopup(); }
+    function textContent(e) { return e.querySelector('ul').firstChild.textContent; }
+    function getExDaytime(c, dt) { let cw = c.whenid; if(cw.length==2){if(cw[0]==dt){return [cw[1],c.when.split('・')[1]];}else{return [cw[0],c.when.split('・')[0]];}}}
+    function f(t, le, e=null, c=null) {                             // [func] 最終的に講義の追加や削除をする関数
+        new Promise((resolve, reject) => {setTimeout(() => {
+            for(let l of le) { if (l != null) { delete t[textContent(l)]; }}
+            if (c != null) { t[textContent(e)] = c; }
+            localStorage.setItem('table', JSON.stringify(t));
+            resolve();
+        }, 10)}).then(() => { fill(); hidePopup(); });
     }
+
+    let table = JSON.parse(localStorage.getItem('table'));           // [var] localのtable
+    let filled_daytimes = getFillDaytimes(table);                    // [var] tableに埋まっている講義の曜日時限
+    let candidates = JSON.parse(localStorage.getItem('candidates')); // [var] 選択したセルの曜日時限と一致する講義候補
+    let e = document.getElementById('classes-wrapper');              // [var] 選択したセルの曜日時限と一致する講義の親エレメント
+    let daytime = e.children[0].getAttribute('value');               // [var] 選択したセルの曜日時限
+    let lec_e = document.getElementById(`${daytime}-course`);        // [var] 選択したセルに既にセットされている講義
+
+    if (e.children[1].tagName == 'BUTTON') {                         // [cond] 講義がステージングされている時（講義を追加する時）
+        let candidate = candidates[textContent(e.children[1])];           // [var] ステージングされた講義
+        let [i, ijp] = getExDaytime(candidate, daytime);                  // [var] ステージングされた講義の選択している曜日時限以外の曜日時限
+        if (i in filled_daytimes) {                                       // [cond] 追加する時にconflictがあった時
+            let conflicted_class = document.getElementById(`${i}-course`) // [var] コンフリクトされた側の講義
+            if (textContent(conflicted_class) != candidate.classname) {
+                result = confirm(
+                    `"${ijp}"でコンフリクトが発生しました。\n`+
+                    `「${textContent(conflicted_class)}」を削除して「${candidate.classname}」を登録しますか？`
+                );
+                if (result) { f(table, le=[lec_e, conflicted_class], e=e.children[1], c=candidate); } else { hidePopup(); }
+            } else { hidePopup(); }
+        } else { f(table, le=[lec_e], e=e.children[1], c=candidate); }      // [cond] 追加時のconflictがなかった時
+    } else { f(table, le=[lec_e]); }                                 // [cond] 講義が何もステージングされていない時（講義を削除する時）
 }

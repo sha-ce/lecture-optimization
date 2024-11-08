@@ -71,4 +71,7 @@
         height: 300px; /* 固定の高さを設定 */
         max-height: 300px;
     }
+    small, small a {
+        font-size: 0.6rem;
+    }
 }

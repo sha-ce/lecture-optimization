@@ -26,6 +26,7 @@
     height: 80%;
     background-color: #eee;
     z-index: 1000;
+    overflow-y: auto;
 }
 .popup-content:hover {
     cursor: auto;
@@ -33,6 +34,7 @@
     transition: 0.3s;
 }
 .close {
+    background-color: #eee;
     border: none;
     color: #aaa;
     float: right;

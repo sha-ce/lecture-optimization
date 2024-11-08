@@ -91,3 +91,57 @@ for (let i=0; i<keywords.length; i++) {
     let incode = `<input type="checkbox" id="key${i}" value="${keywords[i]}"><label for="key${i}">${keywords[i]}</label>`;
     el_key.insertAdjacentHTML("beforeend", incode);
 }
+
+// pdf file upload form
+const dropZone = document.getElementById("drop-zone");
+const fileInput = document.getElementById("pdf-input");
+const preview = document.getElementById("preview");
+
+// ファイルが選択されたときの処理
+fileInput.addEventListener("change", handleFileSelect);
+
+// ドラッグ＆ドロップのイベントリスナー
+dropZone.addEventListener("click", () => fileInput.click());
+dropZone.addEventListener("dragover", (event) => {
+    event.preventDefault();
+    dropZone.classList.add("dragover");
+});
+dropZone.addEventListener("dragleave", () => {
+    dropZone.classList.remove("dragover");
+});
+dropZone.addEventListener("drop", (event) => {
+    event.preventDefault();
+    dropZone.classList.remove("dragover");
+    const files = event.dataTransfer.files;
+    if (files.length > 0) {
+        handleFileSelect({ target: { files } });
+    }
+});
+
+// ファイルが選択/ドロップされたときの処理関数
+function handleFileSelect(event) {
+    const file = event.target.files[0];
+    if (file && file.type === "application/pdf") { readPDF(file); }
+}
+
+// PDFファイルの読み込み関数
+function readPDF(file) {
+    const reader = new FileReader();
+    reader.onload = () => {
+        const pdfData = reader.result;
+        console.log("PDFのデータが読み込まれました。");
+
+        // プレビューの表示
+        const iframe = document.createElement("iframe");
+        iframe.style.width = "100%";
+        iframe.style.height = "100%";
+        iframe.src = pdfData;
+
+        dropZone.querySelector('p').textContent = '';
+        preview.style.display = 'block';
+
+        preview.innerHTML = "";
+        preview.appendChild(iframe);
+    };
+    reader.readAsDataURL(file);
+}

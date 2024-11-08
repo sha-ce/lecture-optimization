@@ -77,12 +77,8 @@ function sendMessage() {
         fetch(url, config)
         .then(data => { return data.json(); })
         .then(res  => {
-            // console.log(res);
-            let llmans = res.response.slice(-1)[0];
-            typeMessage(llmans, 'bot');
-            chatHistory.push(llmans);
-
             let resparams = res.new_params;
+            console.log(resparams);
             let new_alphas = [
                 resparams["Optimization of class days"],
                 resparams["Fewer assignments"],
@@ -93,8 +89,14 @@ function sendMessage() {
                 resparams["Fewer exams"],
             ]
             localStorage.setItem('alphas', new_alphas);
+            setInfo();
+
+            let llmans = res.response.slice(-1)[0];
+            typeMessage(llmans, 'bot');
+            chatHistory.push(llmans);
         })
         .catch(e   => {
+            console.log(e);
             typeMessage('ERROR：もう一回入力して。', 'bot');
             chatHistory.pop();
             return false
