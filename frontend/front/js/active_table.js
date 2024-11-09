@@ -46,15 +46,15 @@ function setInfo() {
     let a = localStorage.getItem('alphas').split(',').map(Number);
     let astr = '';
     s =  [
-        ['授業日数 ', 'どうでもいい', '少なめ', '多め'],
-        ['課題の量 ', 'どうでもいい', '少なめ', '多め'],
-        ['単位数 ', 'どうでもいい', '少なめ', '多め'],
+        ['授業日数 ', 'どうでもいい', '多め', '少なめ'],
+        ['課題の量 ', 'どうでもいい', '多め', '少なめ'],
+        ['単位数 ', 'どうでもいい', '多め', '少なめ'],
         ['対面か遠隔 ', 'どっちでもいい', '→ 対面', '→ 遠隔'],
-        ['興味関心 ', 'そんなの知らん', '無視する', '優先する'],
+        ['興味関心 ', '考慮しない', '無視する', '優先する'],
         ['朝は ', '弱くも強くもない', '強い', '弱い'],
-        ['試験 ', '無関心', '大好き', '大嫌い'],
+        ['試験 ', '考慮しない', '大好き', '大嫌い'],
     ];
-    for (let i=0; i<s.length; i++) { astr += `<p>${s[i][0]} ` + ((a[i]==0)?`${s[i][1]}（${a[i]}）`:(a[i]>0)?`${s[i][2]}（${a[i]}）`:`${s[i][3]}（${-a[i]}）`)+`</p>`; }
+    for (let i=0; i<s.length; i++) { astr += `<p>${s[i][0]} ` + ((a[i]==0)?`${s[i][1]}（${a[i]}）`:(a[i]<0)?`${s[i][2]}（${-a[i]}）`:`${s[i][3]}（${a[i]}）`)+`</p>`; }
 
     let conditions_code = `
         <h3>Course</h3>
@@ -68,7 +68,7 @@ function setInfo() {
         <h3>Keywords</h3>
         <p>${localStorage.getItem('keywords')}</p>
         <div class="button-wrapper">
-        <button type="submit" id="submit" class="submit" onclick="window.location.assign('../../');">re-parameterize</button>
+        <button type="submit" id="submit" class="submit" onclick="window.location.assign('../../index.html');">re-parameterize</button>
         </div>
     `;
     selected_conditions.insertAdjacentHTML("beforeend", conditions_code);
