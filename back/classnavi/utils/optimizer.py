@@ -22,7 +22,7 @@ def parse_times(schedule):
     """
     return re.findall(r'[月火水木金土日]曜\d限', schedule)
 
-def optimize_classes(alpha_values, data_path='data.csv', quarter=1, L_early=0, min_units=1, max_units=float('inf'), keywords="", pdf_content=None):
+def optimize_classes(alpha_values, data_path='data.csv', quarter=1, L_early=0, min_units=1, max_units=float('inf'), keywords="", pdf_content=None, non_selectable_classes=[], must_select_classes=[]):
     
     # データ読み込み
     df = pd.read_csv(data_path)
@@ -66,6 +66,16 @@ def optimize_classes(alpha_values, data_path='data.csv', quarter=1, L_early=0, m
     
     # 変数の定義
     x_vars = {i: pulp.LpVariable(f'x_{i}', cat='Binary') for i in df.index}
+
+    # non_selectable_classes と must_select_classes の制約を追加
+    for i in df.index:
+        # non_selectable_classes に含まれている授業は選択しないようにする
+        if df.loc[i, 'classname'] in non_selectable_classes:
+            problem += x_vars[i] == 0
+        
+        # must_select_classes に含まれている授業は必ず選択する
+        if df.loc[i, 'classname'] in must_select_classes:
+            problem += x_vars[i] == 1
     
     # 目的関数の設定: ここで x_vars を直接使用して授業日数を最適化
     problem += (
