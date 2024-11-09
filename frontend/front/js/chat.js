@@ -79,16 +79,20 @@ function sendMessage() {
         .then(res  => {
             let resparams = res.new_params;
             console.log(resparams);
-            let new_alphas = [
-                resparams["Optimization of class days"],
-                resparams["Fewer assignments"],
-                resparams["Optimization of credit hours"],
-                resparams["Fewer remote classes"],
-                resparams["Fewer courses of interest"],
-                resparams["Few early morning classes"],
-                resparams["Fewer exams"],
-            ]
+            if (resparams != null){
+                let new_alphas = [
+                    resparams["Optimization of class days"],
+                    resparams["Fewer assignments"],
+                    resparams["Optimization of credit hours"],
+                    resparams["Fewer remote classes"],
+                    resparams["Fewer courses of interest"],
+                    resparams["Few early morning classes"],
+                    resparams["Fewer exams"],
+                ]
             localStorage.setItem('alphas', new_alphas);
+            } else {
+                console.log("Null response received, retaining original parameters");
+            }
             setInfo();
 
             let llmans = res.response.slice(-1)[0];

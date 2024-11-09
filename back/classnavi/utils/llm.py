@@ -43,14 +43,14 @@ def NeedRecalc(chat_history: list, param_dict: dict) -> dict:
         - Few early morning classes: {alpha_5} (-5 indicates more early morning classes, 5 indicates fewer early morning classes)
         - Optimization of class days: {alpha_0} (-5 indicates more class days, 5 indicates fewer class days)
         - Fewer assignments: {alpha_1} (-5 indicates more assignments, 5 indicates fewer assignments)
-        - Optimization of credit hours: {alpha_2} (-5 indicates fewer credits, 5 indicates more credits)
-        - Fewer remote classes: {alpha_3} (-5 indicates more remote classes, 5 indicates fewer remote classes)
+        - Optimization of credit hours: {alpha_2} (-5 indicates more credits, 5 indicates fewer credits)
+        - Fewer remote classes: {alpha_3} (-5 indicates fewer remote classes, 5 indicates more remote classes)
         - Fewer courses of interest: {alpha_4} (-5 indicates more uninteresting courses, 5 indicates more interesting courses)
         - Fewer exams: {alpha_6} (-5 indicates more exams, 5 indicates fewer exams)
 
         **Important**: If there is a specific user request, prioritize it above other considerations. For example, if the user requests "I don't mind attending more school days this semester," adjust the "Optimization of class days" parameter by decreasing its value to allow for an increased number of class days. Ensure all adjustments align with the user's request.
 
-        If no specific user request is identified in the latest conversation, analyze whether the current parameter values provide a balanced and optimized timetable. If adjustments are unnecessary based on the current parameter values, respond with "None." Only if there is a clear need for improvement, propose new parameter values in the following JSON format:
+        If no specific user request is identified in the latest conversation, return "None" with no additional explanation or details. Only if a clear user request exists, analyze whether the current parameter values meet the user's preference and propose adjustments in the following JSON format:
 
         {{
             "Few early morning classes": ?,
@@ -75,7 +75,8 @@ def NeedRecalc(chat_history: list, param_dict: dict) -> dict:
             )
 
     # 最後から10個のメッセージを取り出してプロンプトを作成
-    latest_messages = chat_history[-10:] # チャット履歴から最新10件を取得
+    latest_messages = chat_history[-2:] # チャット履歴を取得
+    print("latest_messages: ", latest_messages)
     chat_prompt = "\n".join(latest_messages) # プロンプトとして結合
 
     prompt = ChatPromptTemplate.from_messages(
@@ -122,13 +123,17 @@ def generate_response(chat_history: list, param_dict: list, recalc: bool) -> str
 
     system_prompt = "あなたは日本人の友達．回答は全て日本語で行って，フラットにタメ口で話す感じでよろしく!!"
 
-    prompt = ChatPromptTemplate.from_messages(
-        [
-            ("system", system_prompt),
-            ("ai", chat_history[-2]),
-            ("human", "{input}")
-        ]
-    )
+    # チャット履歴が10を超える場合は最新の10件に制限する
+    if len(chat_history) > 10:
+        chat_history = chat_history[-10:]
+
+    # プロンプトの組み立て
+    messages = [("system", system_prompt)]
+    for i in range(len(chat_history)):
+        role = "ai" if i % 2 == 0 else "human"
+        messages.append((role, chat_history[i]))
+
+    prompt = ChatPromptTemplate.from_messages(messages)
 
     conversation = LLMChain(
         llm=groq_chat,
