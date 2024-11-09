@@ -1,50 +1,48 @@
-
-const CURRENT_URL = window.location.href.split('/');
-const BASE_URL = `${CURRENT_URL[0]}//${CURRENT_URL[2].split(':')[0]}:8080/`;
+///////////////////////////////
+// backにアクセするためのURL設定 //
+///////////////////////////////
+const CURRENT_URL = window.location.href.split('/');                         // [var] frontの現在のURL
+const BASE_URL = `${CURRENT_URL[0]}//${CURRENT_URL[2].split(':')[0]}:8080/`; // [var] frontのURLを継承してportを8080に変更
 // const BASE_URL = 'http://0.0.0.0:8080/';
 
-function getItemfromId(id) {
+
+
+/////////////
+// 各種関数 //
+///////////// 
+function getItemfromId(id) { // [func] idを指定してそのタグに格納されているvalueを返すとともにlocalstrageに格納する
     val = document.getElementById(id).value;
     localStorage.setItem(id, val);
     return val
 }
-function getDatafromForm() {
+function getDatafromForm() { // [func] index.htmlで各種パラメータを設定した値をreturn
     const compulsory = getItemfromId('compulsory');
-    // const grade = getItemfromId('grade');
-    const quarter = getItemfromId('quarter');
-    const special = getItemfromId('special');
-    const social = getItemfromId('social');
-    // if (compulsory == 'default' | grade == 'default' | quarter == 'default' | special == 'default' | social == 'default') {
+    const quarter    = getItemfromId('quarter');
+    const special    = getItemfromId('special');
+    const social     = getItemfromId('social');
     if (compulsory == 'default' | quarter == 'default' | special == 'default' | social == 'default') {
         alert('「コース選択」で未選択の項目があります');
         return false;
     }
-
     const alphas = [];
     for (let i=0; i<questions.length; i++) {
         let ele = document.getElementsByName('q'+String(i));
         for (let i = 0; i < ele.length; i++){
-            if (ele.item(i).checked){
-                alphas.push(ele.item(i).value);
-            }
+            if (ele.item(i).checked){ alphas.push(ele.item(i).value); }
         }
     }
-
     const l_early = document.getElementById('lecture-early').value;
     const units = [
         document.getElementById('min-units').value,
         document.getElementById('max-units').value,
     ];
-
     var selected_keywords = '';
     for (let i=0; i<keywords.length; i++) {
         let el = document.getElementById('key'+String(i));
         if (el.checked) { selected_keywords += `${el.value}, `; }
     }
-
     return {
         compulsory: compulsory,
-        // grade: grade,
         quarter: quarter,
         special: special,
         social: social,
@@ -54,27 +52,20 @@ function getDatafromForm() {
         keywords: selected_keywords,
     };
 }
-function postToLocal() {
+function postToLocal() { // [func] getしたデータをlocalstarageに送信する
     let data = getDatafromForm();
     if (data) {
         for (let k in data) { localStorage.setItem(k, data[k]); }
-
         const file = document.getElementById("pdf-input").files[0];
         if (file) {
             const reader = new FileReader();
-            reader.onload = function(event) {
-                const base64Data = event.target.result;
-                localStorage.setItem("pdfFile", base64Data);
-            };
+            reader.onload = function(event) { localStorage.setItem("pdfFile", event.target.result); };
             reader.readAsDataURL(file);
-        } else {
-            localStorage.setItem("pdfFile", null);
-        }
+        } else { localStorage.setItem("pdfFile", null); }
         window.location.assign('./front/pages/table.html');
     }
 };
-
-function get(data) {
+function get(data) { // [func] localstrageにある各アイテムをバックに送信し、最適化された講義を得る
     const url = BASE_URL+'optimizer/items/';
     let body = new FormData();
     body.append('item', String(JSON.stringify(data)));
@@ -86,24 +77,18 @@ function get(data) {
         for (let i = 0; i < binaryString.length; i++) { bytes[i] = binaryString.charCodeAt(i); }
         const blob = new Blob([bytes], { type: "application/pdf" });
         body.append('pdf_file', blob);
-    } else {
-        body.append('pdf_file', new Blob([], { type: "application/pdf" }));
-    }
+    } else { body.append('pdf_file', new Blob([], { type: "application/pdf" })); }
 
     const config = {
         method: "POST",
-        body: body
+        body: body // [var] itemsの文字列と、pdfファイルがあるならそのバイナリの2つを格納したデータ
     }
-
     fetch(url, config)
     .then(response => { return response.json(); })
     .then(res => {
         loaded();
         if (!Array.isArray(res)) { alert('制約が厳しすぎます。各種パラメータを再調整してください。'); }
-        else {
-            setLocalClasses('table', res);
-            fill();
-        }
+        else { setLocalClasses('table', res); fill(); }
     })
     .catch(e  => {
         alert(e);
@@ -113,6 +98,9 @@ function get(data) {
 };
 
 
+//////////////////////////////////////
+// 時間割をアクティブにするための各種関数 //
+//////////////////////////////////////
 function setLocalClasses(key, classes) {
     let days = {'月曜': 'mon', '火曜': 'tue', '水曜': 'wed', '木曜': 'thu', '金曜': 'fri'}
     let times = {'１限': '1', '２限': '2', '３限': '3', '４限': '4', '５限': '5', '６限': '6'}
@@ -128,7 +116,6 @@ function setLocalClasses(key, classes) {
     }
     localStorage.setItem(key, JSON.stringify(new_res));
 }
-
 function initTable() {
     let days = ['mon', 'tue', 'wed', 'thu', 'fri'];
     let times = ['1', '2', '3', '4', '5', '6'];
@@ -151,7 +138,11 @@ function fill() {
     }}
 };
 
-//loading
+
+
+////////////////////////////////////////////////////////////
+// backからレスが来るまでのローディングアニメーションをon, offする //
+////////////////////////////////////////////////////////////
 function loading() {
     const loader = document.getElementById('loader');
     const anti = document.getElementById('antiload');
@@ -166,26 +157,23 @@ function loaded() {
 }
 
 
-// popup
+/////////////////////////////////////////////////////////////
+// セルを選択した時のポップアップウィンドウをアクティブにする各種関数 //
+/////////////////////////////////////////////////////////////
 function isinCell(day, time) {
     let act_course_el = document.getElementById(`${day}-${time}-course`);
-    if (act_course_el == null) { return false; } else {
-        return act_course_el.firstElementChild.firstElementChild.textContent;
-    }
+    if (act_course_el == null) { return false; } else { return act_course_el.firstElementChild.firstElementChild.textContent; }
 }
 function removeCand() { document.getElementById('classes-wrapper').remove(); }
 function setCand(classes, [day, time]) {
     setLocalClasses('candidates', classes);
 
     let popclass_el = document.getElementById('popup-classes');
-    let inline = `
-        <div id="classes-wrapper">
+    let inline = `<div id="classes-wrapper">
         <p value="${day}-${time}">
-            ${localStorage.getItem('quarter')},
-            ${{'mon': '月曜', 'tue': '火曜', 'wed': '水曜', 'thu': '木曜', 'fri': '金曜'}[day]} 
-            ${time}限
-        </p>
-    `;
+        ${localStorage.getItem('quarter')},
+        ${{'mon': '月曜', 'tue': '火曜', 'wed': '水曜', 'thu': '木曜', 'fri': '金曜'}[day]} 
+        ${time}限</p>`;
     let active_class = isinCell(day, time);
     if (!active_class) {inline += 'stage<div class="border"></div>'; }
     let inline_ = '';
@@ -208,8 +196,6 @@ function getFillDaytimes(table) {
     for (let [_, c] of Object.entries(table)) { for (let daytime of c.whenid) { filldaytimes[`${daytime}`] = ''; }}
     return filldaytimes
 }
-
-// popup
 function popup(cell) {
     document.getElementById('popup-window').style.display = 'block';
 
@@ -242,7 +228,11 @@ window.onclick = function(event) {
     if (event.target == popwin) { popwin.style.display = "none"; removeCand(); }
 }
 
-// 講義登録
+
+
+/////////////////////////////
+// 講義を追加・削除する各種関数 //
+/////////////////////////////
 function onStage(e) {
     let children = e.parentNode.children;
     let toStageid = null;
