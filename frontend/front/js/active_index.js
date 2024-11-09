@@ -36,6 +36,7 @@ let questions = [
     {title: '早朝の授業はなるべく', labels: ['多く受けたい', '受けたくない']},
     {title: '試験のある授業は', labels: ['大好き', '大嫌い']},
 ]
+const alphas = (localStorage.hasOwnProperty('alphas')) ? localStorage.getItem('alphas').split(',').map(Number) : null;
 for (let i=0; i<questions.length; i++) {
     let incode = `
         <div class="question"><label class="label">${questions[i].title}</label>
@@ -53,11 +54,17 @@ for (let i=0; i<questions.length; i++) {
         <span class="label-right res-phone">${questions[i].labels[1]}</span></div></div></div>
     `;
     question_el.insertAdjacentHTML("beforeend", incode);
+    if (alphas != null) { document.getElementById(`q${i}-${alphas[i]}`).checked = true; }
 }
 
 let le_el = document.getElementById('lecture-early');
+let le_slider_el = document.getElementById('slider1');
 let times = ['', '08:50(1限〜)', '10:30(2限〜)', '13:00(3限〜)', '14:40(4限〜)', '16:20(5限〜)']
 for (let i=1; i<times.length; i++) { le_el.insertAdjacentHTML("beforeend", `<option value="${i}">${times[i]}</option>`); }
+let le_def = (localStorage.hasOwnProperty('l_early')) ? Number(localStorage.getItem('l_early')) : 1;
+le_el.value = le_def;
+le_slider_el.value = le_def;
+
 
 function updateValueFromSlider(id, value) { document.getElementById(id).value = value; };
 function updateValueFromInput(id, value) { document.getElementById(id).value = value; };
@@ -65,6 +72,11 @@ function updateValueFromInput(id, value) { document.getElementById(id).value = v
 const range = document.getElementById('range');
 const num2 = document.getElementById('min-units');
 const num3 = document.getElementById('max-units');
+if (localStorage.hasOwnProperty('units')) {
+    let units_def = localStorage.getItem('units').split(',').map(Number);
+    num2.value = units_def[0];
+    num3.value = units_def[1];
+}
 noUiSlider.create(range, {
     range: {'min': 0, 'max': 30},
     step: 1,
@@ -87,8 +99,11 @@ var keywords = [
     '有限体論', 'RSA暗号', '楕円曲線号', '機械学習', '深層学習',
     '最適化', 'ソルバー',
 ];
+let selected_keywords = [];
+if (localStorage.hasOwnProperty('keywords')) { for (let k of localStorage.getItem('keywords').split(', ')) { selected_keywords[k] = ''; }}
 for (let i=0; i<keywords.length; i++) {
-    let incode = `<input type="checkbox" id="key${i}" value="${keywords[i]}"><label for="key${i}">${keywords[i]}</label>`;
+    let cheked =  (keywords[i] in selected_keywords) ? 'checked' : '';
+    let incode = `<input type="checkbox" id="key${i}" value="${keywords[i]}" ${cheked}><label for="key${i}">${keywords[i]}</label>`;
     el_key.insertAdjacentHTML("beforeend", incode);
 }
 
