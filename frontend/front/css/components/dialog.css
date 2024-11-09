@@ -48,7 +48,7 @@
     background: none;
     border: solid 1px #eee;
     align-self: flex-end;
-    text-align: right;
+    text-align: left;
     margin-left: auto;
 }
 .message.bot {
