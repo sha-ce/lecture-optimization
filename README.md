@@ -13,7 +13,7 @@ Docker環境が使える環境で以下のコマンドを実行．
 ```bash
 docker-compose up --build
 ```
-その後，frontendはhttp://localhost:3000 ，backendは http://localhost:8080に立ち上がる．
+その後，frontendはhttp://localhost:3000 ，backendは http://localhost:8080 に立ち上がる．
 
 ## Backend
 バックエンドのAPIドキュメントは
