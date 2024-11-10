@@ -4,7 +4,7 @@
 
 2. [Google API](https://aistudio.google.com/apikey)からgoogleのAPIキーを作成．
 
-3. .env.templateの名前を.envに変更し，中身を以下のように変更．
+3. `.env.template`の名前を`.env`に変更し，中身を以下のように変更．
 ```bash
 GROQ_API=<取得したAPI GroqKey>
 GOOGLE_API_KEY=<取得したGoogle API Key>
