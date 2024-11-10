@@ -1,3 +1,4 @@
+import torch
 import os
 import json
 import re
@@ -9,18 +10,84 @@ from langchain_core.prompts import (
     HumanMessagePromptTemplate,
 )
 from langchain_groq import ChatGroq
+from langchain_google_genai import GoogleGenerativeAIEmbeddings
 
-from langchain_community.vectorstores import FAISS
-from langchain.document_loaders import DirectoryLoader, CSVLoader
-from langchain_community.embeddings import HuggingFaceEmbeddings
-from langchain.chains.combine_documents import create_stuff_documents_chain
-from langchain_core.prompts import ChatPromptTemplate
-from langchain.chains import create_retrieval_chain
-from langchain_text_splitters import RecursiveCharacterTextSplitter
+from langchain.vectorstores import Chroma
+from langchain_core.documents import Document
+from langchain.chains import RetrievalQA
+import pandas as pd
 
 # Get Groq API Key
 groq_api_key = os.getenv("GROQ_API")
 groq_chat = ChatGroq(groq_api_key=groq_api_key, model_name="llama3-70b-8192")
+embeddings = GoogleGenerativeAIEmbeddings(model="models/embedding-001", task_type="retrieval_document")
+
+def create_class_documents(data_path: str):
+    """
+    data_path: str: 授業情報を含むCSVファイルのパス
+    """
+    # データ読み込み
+    df = pd.read_csv(data_path)
+
+    # 課題の量の数値を文章に変換するマッピング
+    homework_mapping = {
+        -5: "ほとんど課題がない",
+        -4: "かなり少ない課題量",
+        -3: "少なめの課題量",
+        -2: "やや少ない課題量",
+        -1: "少しだけ課題がある",
+        0: "平均的な課題量",
+        1: "少し多めの課題",
+        2: "やや多い課題量",
+        3: "多めの課題量",
+        4: "かなり多い課題量",
+        5: "非常に多い課題量"
+    }
+
+    # 各行に対してDocumentオブジェクトを生成
+    documents = []
+    for _, row in df.iterrows():
+        classname = row['classname']
+        teacher = row['teacher']
+        test = "あり" if row['test'].lower() == "yes" else "なし"
+        remote = "リモート授業" if row['remote'].lower() == "yes" else "対面授業"
+        homework = homework_mapping.get(row['homework'], "不明な課題量")
+        numofunits = row['numofunits']
+        when = row['when']
+        semester = row['semester']
+        unitclass = row['unitclass']
+        keyword = row['keyword']
+        classoutline = row['classoutline']
+
+        # 文章を作成
+        description = (
+            f"{classname}の授業は{when}に開講され、"
+            f"担当教員は{teacher}で、テストは{test}、"
+            f"{remote}であり、宿題の量は{homework}、"
+            f"単位数は{numofunits}、学期は{semester}、"
+            f"授業区分は{unitclass}、キーワードは{keyword}、"
+            f"授業概要は{classoutline}です。"
+        )
+
+        # Documentオブジェクトを作成しリストに追加
+        documents.append(Document(page_content=description))
+        print(description)
+
+    return documents
+
+def create_class_vector_store(documents):
+    """
+    documents: list: Documentオブジェクトのリスト
+    """
+
+    # ベクトルストアの作成
+    vector_store = Chroma.from_documents(documents, embedding=embeddings, persist_directory=None)
+    retriever = vector_store.as_retriever(search_kwargs={'k': 20})
+
+    return retriever
+
+documents = create_class_documents("classnavi/data_old/data_old.csv")
+retriever = create_class_vector_store(documents)
 
 # パラメータの再計算が必要かどうかを判定する関数
 def NeedRecalc(chat_history: list, param_dict: dict) -> dict:
@@ -75,7 +142,7 @@ def NeedRecalc(chat_history: list, param_dict: dict) -> dict:
             )
 
     # 最後から10個のメッセージを取り出してプロンプトを作成
-    latest_messages = chat_history[-2:] # チャット履歴を取得
+    latest_messages = chat_history[-1:] # チャット履歴を取得
     print("latest_messages: ", latest_messages)
     chat_prompt = "\n".join(latest_messages) # プロンプトとして結合
 
@@ -121,17 +188,28 @@ def generate_response(chat_history: list, param_dict: list, recalc: bool) -> str
     ユーザーへのレスポンスを生成する関数
     """
 
-    system_prompt = "あなたは日本人の友達．回答は全て日本語で行って，フラットにタメ口で話す感じでよろしく!!"
+    system_prompt = "あなたは大学の友達．ユーザーが時間割を決定する上で役立ちそうな情報があれば，ユーザーに教えてあげて．回答は全て日本語で行って，友達みたいにフラットにタメ口で話す感じでよろしく!!"
 
     # チャット履歴が10を超える場合は最新の10件に制限する
     if len(chat_history) > 10:
         chat_history = chat_history[-10:]
+
+    # 最新のユーザーの入力を取得
+    user_input = chat_history[-1]
+
+    # 関連コンテキストの取得
+    related_docs = retriever.get_relevant_documents(user_input)
+    context = "\n".join([doc.page_content for doc in related_docs])
 
     # プロンプトの組み立て
     messages = [("system", system_prompt)]
     for i in range(len(chat_history)):
         role = "ai" if i % 2 == 0 else "human"
         messages.append((role, chat_history[i]))
+    print(f"context: {context}")
+
+    # コンテキストをプロンプトに追加
+    messages.append(("system", f"以下の情報を参考にしてください:\n{context}"))
 
     prompt = ChatPromptTemplate.from_messages(messages)
 
@@ -141,7 +219,7 @@ def generate_response(chat_history: list, param_dict: list, recalc: bool) -> str
         verbose=False
     )
 
-    response = conversation.predict(input=chat_history[-1])
+    response = conversation.predict(input=user_input)
     print(response)
 
     chat_history.append(response)
