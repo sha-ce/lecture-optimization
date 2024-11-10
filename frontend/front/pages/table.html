@@ -15,10 +15,12 @@
 
     <div class="container-wrapper">
         <div class="container">
+            <!-- your info button -->
             <button id="selected-conditions" class="submit">your info<div id="your-info" class="hover-up"></div></button>
+            <!-- dialogue button -->
             <button id="chat" class="submit" onclick="openCloseChat()">dialogue</button>
+            <!-- time table -->
             <h1>時間割</h1>
-
             <div id="antiload">
                 <table class="timetable">
                     <thead><tr id="table-columns"></tr></thead>
@@ -29,6 +31,7 @@
         </div>
     </div>
 
+    <!-- 選択されたセルのポップアップウィンドウ -->
     <div id="popup-window" class="popup">
         <div class="popup-content">
           <button id="close-popup-window" class="close" onclick="hidePopup()">×</button>
@@ -37,6 +40,7 @@
         </div>
     </div>
 
+    <!-- LLM Chat ウィンドウ -->
     <div id="dialog" class="dialog-content" style="display: none;">
         <h1>LLM Dialogue</h1>
         <div class="chat-window" id="chat-window"></div>
