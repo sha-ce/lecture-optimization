@@ -41,6 +41,17 @@ function getDatafromForm() { // [func] index.htmlで各種パラメータを設�
         let el = document.getElementById('key'+String(i));
         if (el.checked) { selected_keywords += `${el.value}, `; }
     }
+    
+    let must_select_classes = [];
+    if (localStorage.hasOwnProperty('must_select_classes')) {
+        try {
+            must_select_classes = JSON.parse(localStorage.getItem('must_select_classes')) || [];
+        } catch (e) {
+            console.error("Failed to parse must_select_classes from localStorage:", e);
+            must_select_classes = [];
+        }
+    }
+
     return {
         compulsory: compulsory,
         quarter: quarter,
@@ -50,6 +61,7 @@ function getDatafromForm() { // [func] index.htmlで各種パラメータを設�
         l_early: l_early,
         units: units,
         keywords: selected_keywords,
+        must_select_classes: must_select_classes,
     };
 }
 function postToLocal() { // [func] getしたデータをlocalstarageに送信する
@@ -265,7 +277,11 @@ function setLecture() {
     function f(t, le, e=null, c=null) {                             // [func] 最終的に講義の追加や削除をする関数
         new Promise((resolve, reject) => {setTimeout(() => {
             for(let l of le) { if (l != null) { delete t[textContent(l)]; }}
-            if (c != null) { t[textContent(e)] = c; }
+            if (c != null) { 
+                t[textContent(e)] = c; 
+                must_select_classes.push(c.classname);
+                localStorage.setItem('must_select_classes', JSON.stringify(must_select_classes));
+            }
             localStorage.setItem('table', JSON.stringify(t));
             resolve();
         }, 10)}).then(() => { fill(); hidePopup(); });

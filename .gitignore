@@ -5,3 +5,4 @@ venv
 .env
 *.pdf
 *.PDF
+*/.chroma/*

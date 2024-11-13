@@ -20,7 +20,6 @@ function addSelectOption(id, options) {            // [func] 任意のコース�
     if(localStorage.hasOwnProperty(id)) { e.value = localStorage.getItem(id); }
 }
 
-
 ///////////////////////
 // 条件選択用スクリプト //
 ///////////////////////
@@ -52,7 +51,11 @@ for (let i=0; i<questions.length; i++) {                // [process] 各条件�
         <span class="label-right res-phone">${questions[i].labels[1]}</span></div></div></div>
     `;
     question_el.insertAdjacentHTML("beforeend", incode);
-    if (alphas != null) { document.getElementById(`q${i}-${alphas[i]}`).checked = true; }
+    // alphasがnullでない場合にのみチェックを設定
+    if (alphas && alphas[i] != undefined) { 
+        const alphaElement = document.getElementById(`q${i}-${alphas[i]}`);
+        if (alphaElement) { alphaElement.checked = true; }
+    }
 }
 // [process] l-early のinput処理
 let le_el = document.getElementById('lecture-early');  // [var] l-earlyのインプットエレメント
@@ -108,6 +111,23 @@ for (let i=0; i<keywords.length; i++) {           // [process] キーワード�
     el_key.insertAdjacentHTML("beforeend", incode);
 }
 
+///////////////////////////////
+// 必須選択クラス用スクリプト //
+///////////////////////////////
+let must_select_classes = [];
+if (localStorage.hasOwnProperty('must_select_classes')) {
+    try {
+        const storedClasses = localStorage.getItem('must_select_classes');
+        must_select_classes = storedClasses ? JSON.parse(storedClasses) : [];
+        localStorage.setItem('must_select_classes', JSON.stringify(must_select_classes));
+    } catch (e) {
+        console.error("Failed to parse must_select_classes from localStorage:", e);
+        must_select_classes = [];
+    }
+} else {
+    console.log(localStorage.hasOwnProperty('must_select_classes'))
+    localStorage.setItem('must_select_classes', JSON.stringify(must_select_classes)); // 初回実行時は空のリストを保存
+}
 
 /////////////////////////////////
 // 成績通知書アップロードスクリプト //

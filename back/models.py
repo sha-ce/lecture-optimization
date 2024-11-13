@@ -11,6 +11,7 @@ class Item(BaseModel):
     l_early: str
     units: list
     keywords: list
+    must_select_classes: list
 
 class Cell(BaseModel):
     quarter: int=1

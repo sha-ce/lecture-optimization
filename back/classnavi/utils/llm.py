@@ -81,7 +81,7 @@ def create_class_vector_store(documents):
     """
 
     # ベクトルストアの作成
-    vector_store = Chroma.from_documents(documents, embedding=embeddings, persist_directory=None)
+    vector_store = Chroma.from_documents(documents, embedding=embeddings)
     retriever = vector_store.as_retriever(search_kwargs={'k': 10})
 
     return retriever
@@ -240,7 +240,7 @@ def chat_pipeline(chat_history: list, param_dict: dict) -> str:
 
 def test_chatbot():
     chat_history = []
-    agent_talk = "僕はみんなの要望を受けて，時間割の提案を変更するエージェントだよ．何か要望があれば言ってね．"
+    agent_talk = "僕はみんなの要望を受けて，時間割の提案を変更するエージェントだよ．何か要望があれば言ってね．回答は一言で簡潔にお願い．"
     print(agent_talk)
     chat_history.append(agent_talk)
     param = {'Few early morning classes': 2, 'Optimization of class days': 0, 'Fewer assignments': 0, 'Optimization of credit hours': 0, 'Fewer remote classes': 0, 'Fewer courses of interest': 0, 'Fewer exams': 0}
