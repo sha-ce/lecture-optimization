@@ -83,7 +83,7 @@
 #your-info {
     display: none;
     background-color: #fff;
-    width: min(335px, 80%);
+    width: min(400px, 80%);
     position: fixed;
     top: 100px;
     left: min(300px, 1%);
@@ -113,3 +113,17 @@
         z-index: 99;
     }
 } */
+
+.botton-container {
+    display: flex;
+    justify-content: space-between; /* 両端に寄せる */
+    align-items: center; /* 縦の中央揃え */
+    width: 100%;
+}
+.botton-container a {
+    font-size: 0.8rem;
+}
+
+#antiload p {
+    text-align: right;
+}

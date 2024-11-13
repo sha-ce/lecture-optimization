@@ -247,7 +247,8 @@ function onStage(e) {
         children[toStageid].remove();
         let incode = `<button class="course popup-course" onclick="outStage(this)"><ul>`;
         for (let i=0; i<ts.length; i++) { incode += `<li>${ts[i].textContent}</li>` }
-        children[0].insertAdjacentHTML("afterend", `${incode}</ul></button>`);
+        incode += `</ul></button>`
+        children[0].insertAdjacentHTML("afterend", incode);
     }
 }
 function outStage(e) {
@@ -269,7 +270,8 @@ function setLecture() {
             resolve();
         }, 10)}).then(() => { fill(); hidePopup(); });
     }
-
+    setUnitNum();
+    
     let table = JSON.parse(localStorage.getItem('table'));           // [var] localのtable
     let filled_daytimes = getFillDaytimes(table);                    // [var] tableに埋まっている講義の曜日時限
     let candidates = JSON.parse(localStorage.getItem('candidates')); // [var] 選択したセルの曜日時限と一致する講義候補
@@ -291,4 +293,11 @@ function setLecture() {
             } else { hidePopup(); }
         } else { f(table, le=[lec_e], e=e.children[1], c=candidate); }      // [cond] 追加時のconflictがなかった時
     } else { f(table, le=[lec_e]); }                                 // [cond] 講義が何もステージングされていない時（講義を削除する時）
+}
+
+function setFixedLecture() {
+    result = confirm(`ステージングされた講義を固定しますか？`);
+    if (result) { 
+        setLecture();
+    } else { console.log('固定がキャンセルされました'); }
 }

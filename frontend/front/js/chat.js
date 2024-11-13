@@ -29,7 +29,7 @@ function typeMessage(message, sender) {                    // [func] LLMの出�
         messageDiv.textContent += message[currentIndex];
         currentIndex++;
         if (currentIndex === message.length) { clearInterval(interval); messageDiv.classList.remove("typing"); }
-    }, 50); // 50ms
+    }, 20); // 20ms
 }
 // [var] チャット履歴を格納する変数、初期値にLLM側のテキストを入れる。
 var chatHistory = ['僕はみんなの要望を受けて、時間割の提案を変更するエージェントだよ。何か要望があれば言ってね。'];
@@ -96,4 +96,4 @@ function sendMessage() {                                                     // 
 sendButton.addEventListener("click", sendMessage);                                           // [process] 送信ボタンのクリックイベント
 chatInput.addEventListener("keypress", (e) => { if (e.key === "Enter") { sendMessage(); }}); // [process] エンターでも送信ボタンをクリック
 
-function reOptimize() { location.reload(); }                                                 // [func] 再最適化のボタン、多分リロードだけでうまくいくはず
+function reOptimize() { optimize(); }                                                        // [func] 再最適化のボタン
