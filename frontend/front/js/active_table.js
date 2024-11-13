@@ -16,23 +16,26 @@ for (let time of course_times) {                             // [process] 各行
 }
 let loader_el = document.getElementById('loader'); // (←element, ↓追加コード) backから受け取るまでの間のローディングを表示するHTMLコード
 for (let i=1; i<=12; i++) { loader_el.insertAdjacentHTML("beforeend", `<div class="sk-circle${i} sk-circle"></div>`); }
-loading();                                         // [process] table.htmlが読み込まれた時にゲットするまっでローディングアニメーションを表示
-new Promise((resolve, reject) => {                 // [process] 10msの後、ローカルストレージのデータをget()によりbackに送信し講義情報を受け取る
-    setTimeout(() => {resolve(); }, 10);           // リロード直後にget()するとlocalstrageアクセスが競合してうまくいかないので10ms遅延させる
-}).then(() => {
-    let data = {
-        compulsory: localStorage.getItem('compulsory'),
-        quarter: localStorage.getItem('quarter').replace('Q', ''),
-        special: localStorage.getItem('special'),
-        social: localStorage.getItem('social'),
-        alphas: localStorage.getItem('alphas').split(',').map(Number),
-        l_early: localStorage.getItem('l_early'),
-        units: localStorage.getItem('units').split(',').map(Number),
-        keywords: localStorage.getItem('keywords'),
-    }
-    get(data); // defined in script.js
-});
-
+function optimize() {
+    loading();                                     // [process] table.htmlが読み込まれた時にゲットするまっでローディングアニメーションを表示
+    new Promise((resolve, reject) => {             // [process] 10msの後、ローカルストレージのデータをget()によりbackに送信し講義情報を受け取る
+        setTimeout(() => {resolve(); }, 10);       // リロード直後にget()するとlocalstrageアクセスが競合してうまくいかないので10ms遅延させる
+    }).then(() => {
+        let data = {
+            compulsory: localStorage.getItem('compulsory'),
+            quarter: localStorage.getItem('quarter').replace('Q', ''),
+            special: localStorage.getItem('special'),
+            social: localStorage.getItem('social'),
+            alphas: localStorage.getItem('alphas').split(',').map(Number),
+            l_early: localStorage.getItem('l_early'),
+            units: localStorage.getItem('units').split(',').map(Number),
+            keywords: localStorage.getItem('keywords'),
+        }
+        get(data); // defined in script.js
+        setUnitNum()
+    });
+}
+optimize();
 
 ///////////////
 // your info //
@@ -68,7 +71,7 @@ function setInfo() { // [func] localstrageから情報を取ってきてyour inf
         <h3>Keywords</h3>
         <p>${localStorage.getItem('keywords')}</p>
         <div class="button-wrapper">
-        <button type="submit" id="submit" class="submit" onclick="window.location.assign('../../index.html');">re-parameterize</button>
+        <button type="submit" id="submit" class="submit" onclick="window.location.assign('../../index.html');">条件調整</button>
         </div>
     `;
     selected_conditions.insertAdjacentHTML("beforeend", conditions_code);
@@ -80,4 +83,10 @@ function openCloseInfo() {
     let estyle = document.getElementById('your-info').style;
     if (estyle == null || estyle.display == 'none') { document.getElementById('your-info').style.display='block'; }
     else { document.getElementById('your-info').style.display = 'none'; }
+}
+function setUnitNum() { // [function] 単位数を表示
+    let sum_units = 0;
+    let classes = JSON.parse(localStorage.getItem('table'));
+    for (let [_,c] of Object.entries(classes)) { sum_units +=c.numofunits; }
+    document.getElementById('units-sum').value = sum_units;
 }

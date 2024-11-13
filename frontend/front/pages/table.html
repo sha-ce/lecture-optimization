@@ -15,13 +15,19 @@
 
     <div class="container-wrapper">
         <div class="container">
-            <!-- your info button -->
-            <button id="selected-conditions" class="submit">your info<div id="your-info" class="hover-up"></div></button>
-            <!-- dialogue button -->
-            <button id="chat" class="submit" onclick="openCloseChat()">dialogue</button>
+            <div class="botton-container">
+                <div>
+                    <!-- your info button -->
+                    <button id="selected-conditions" class="submit">選択情報<div id="your-info" class="hover-up"></div></button>
+                    <a href="../../index.html" class="submit">条件調整画面に戻る</a>
+                </div>
+                <!-- dialogue button -->
+                <button id="chat" class="submit" onclick="openCloseChat()">チャット</button>
+            </div>
             <!-- time table -->
             <h1>時間割</h1>
             <div id="antiload">
+                <p>単位数： <input type="number" id="units-sum" min="0" value=null readonly></p>
                 <table class="timetable">
                     <thead><tr id="table-columns"></tr></thead>
                     <tbody id="table-body"></tbody>
@@ -36,19 +42,22 @@
         <div class="popup-content">
           <button id="close-popup-window" class="close" onclick="hidePopup()">×</button>
           <div id="popup-classes"></div>
-          <div class="button-wrapper"><button type="submit" id="submit" class="submit popup-button" onclick="setLecture()">登録</button></div>
+          <div class="button-wrapper">
+            <button type="submit" id="submit" class="submit popup-button" onclick="setLecture()">登録</button>
+            <button onclick="setFixedLecture()" class="submit"><i class="fa-regular fa-snowflake"></i> 固定して登録</button>
+        　</div>
         </div>
     </div>
 
     <!-- LLM Chat ウィンドウ -->
     <div id="dialog" class="dialog-content" style="display: none;">
-        <h1>LLM Dialogue</h1>
+        <h1>LLM Chat</h1>
         <div class="chat-window" id="chat-window"></div>
         <div class="input-area">
             <input type="text" id="chat-input" placeholder="メッセージを入力してください..." />
             <button id="send-button"><i class="fa-regular fa-paper-plane" style="font-size: 16px;"></i></button>
         </div>
-        <div class="button-wrapper"><button type="submit" id="submit" class="submit" onclick="reOptimize()">reoptimize</button></div>
+        <div class="button-wrapper"><button type="submit" id="submit" class="submit" onclick="reOptimize()">時間割を最適化する</button></div>
         <button id="close-dialog-window" class="close dialog-close" onclick="closeChat()">×</button>
     </div>
 
