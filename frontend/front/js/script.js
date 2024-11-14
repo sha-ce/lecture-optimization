@@ -274,15 +274,26 @@ function outStage(e) {
 function setLecture() {
     function textContent(e) { return e.querySelector('ul').firstChild.textContent; }
     function getExDaytime(c, dt) { let cw = c.whenid; if(cw.length==2){if(cw[0]==dt){return [cw[1],c.when.split('・')[1]];}else{return [cw[0],c.when.split('・')[0]];}}}
+    let must_select_classes = [];
+    if (localStorage.hasOwnProperty('must_select_classes')) {
+        try {
+            must_select_classes = JSON.parse(localStorage.getItem('must_select_classes')) || [];
+        } catch (e) {
+            console.error("Failed to parse must_select_classes from localStorage:", e);
+            must_select_classes = [];
+        }
+    }
     function f(t, le, e=null, c=null) {                             // [func] 最終的に講義の追加や削除をする関数
         new Promise((resolve, reject) => {setTimeout(() => {
             for(let l of le) { if (l != null) { delete t[textContent(l)]; }}
-            if (c != null) { 
-                t[textContent(e)] = c; 
-                must_select_classes.push(c.classname);
+            if (c != null) {
+                t[c.classname] = c;
+                if (!must_select_classes.includes(c.classname)) {
+                    must_select_classes.push(c.classname);
+                }
                 localStorage.setItem('must_select_classes', JSON.stringify(must_select_classes));
             }
-            localStorage.setItem('table', JSON.stringify(t));
+            localStorage.setItem('table', JSON.stringify(t)); 
             resolve();
         }, 10)}).then(() => { fill(); hidePopup(); });
     }

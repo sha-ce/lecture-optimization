@@ -21,6 +21,7 @@ import pandas as pd
 groq_api_key = os.getenv("GROQ_API")
 groq_chat = ChatGroq(groq_api_key=groq_api_key, model_name="llama3-70b-8192")
 embeddings = GoogleGenerativeAIEmbeddings(model="models/embedding-001", task_type="retrieval_document")
+csv_path = "classnavi/data_old/data_old.csv"
 
 def create_class_documents(data_path: str):
     """
@@ -71,7 +72,6 @@ def create_class_documents(data_path: str):
 
         # Documentオブジェクトを作成しリストに追加
         documents.append(Document(page_content=description))
-        print(description)
 
     return documents
 
@@ -81,12 +81,12 @@ def create_class_vector_store(documents):
     """
 
     # ベクトルストアの作成
-    vector_store = Chroma.from_documents(documents, embedding=embeddings)
-    retriever = vector_store.as_retriever(search_kwargs={'k': 10})
+    vector_store = Chroma.from_documents(documents, embedding=embeddings, persist_directory=None)
+    retriever = vector_store.as_retriever(search_kwargs={'k': 5})
 
     return retriever
 
-documents = create_class_documents("classnavi/data_old/data_old.csv")
+documents = create_class_documents(csv_path)
 retriever = create_class_vector_store(documents)
 
 # パラメータの再計算が必要かどうかを判定する関数
@@ -111,7 +111,7 @@ def NeedRecalc(chat_history: list, param_dict: dict) -> dict:
         - Optimization of class days: {alpha_0} (-5 indicates more class days, 5 indicates fewer class days)
         - Fewer assignments: {alpha_1} (-5 indicates more assignments, 5 indicates fewer assignments)
         - Optimization of credit hours: {alpha_2} (-5 indicates more credits, 5 indicates fewer credits)
-        - Fewer remote classes: {alpha_3} (-5 indicates fewer remote classes, 5 indicates more remote classes)
+        - Fewer remote classes: {alpha_3} (-5 indicates more remote classes, 5 indicates fewer remote classes)
         - Fewer courses of interest: {alpha_4} (-5 indicates more uninteresting courses, 5 indicates more interesting courses)
         - Fewer exams: {alpha_6} (-5 indicates more exams, 5 indicates fewer exams)
 
@@ -130,6 +130,13 @@ def NeedRecalc(chat_history: list, param_dict: dict) -> dict:
         }}
 
         If no adjustments are needed, return "None" with no additional explanation or details.
+        If the input contains the lecture name or the instructor's name, please output it in the following JSON format.
+        **Important**: Please make sure to output the lecture name and instructor's name exactly as they are, without any translation into English or other modifications.
+
+        {{
+            "class_name": "<class name>",
+            "teacher": "<teacher's name>"
+        }}
 
         """.format(
                 alpha_0=param_dict['Optimization of class days'],
@@ -143,7 +150,6 @@ def NeedRecalc(chat_history: list, param_dict: dict) -> dict:
 
     # 最後から10個のメッセージを取り出してプロンプトを作成
     latest_messages = chat_history[-1:] # チャット履歴を取得
-    print("latest_messages: ", latest_messages)
     chat_prompt = "\n".join(latest_messages) # プロンプトとして結合
 
     prompt = ChatPromptTemplate.from_messages(
@@ -153,16 +159,8 @@ def NeedRecalc(chat_history: list, param_dict: dict) -> dict:
         ]
     )
     # 正規表現を用いてJSONデータを抽出
-    json_pattern = r'\{\s*' + \
-                   r'"Few early morning classes":\s*-?\d+,\s*' + \
-                   r'"Optimization of class days":\s*-?\d+,\s*' + \
-                   r'"Fewer assignments":\s*-?\d+,\s*' + \
-                   r'"Optimization of credit hours":\s*-?\d+,\s*' + \
-                   r'"Fewer remote classes":\s*-?\d+,\s*' + \
-                   r'"Fewer courses of interest":\s*-?\d+,\s*' + \
-                   r'"Fewer exams":\s*-?\d+\s*' + \
-                   r'\}'
-
+    json_pattern = re.compile(r'\{\s*"Few early morning classes":\s*-?\d+,\s*"Optimization of class days":\s*-?\d+,\s*"Fewer assignments":\s*-?\d+,\s*"Optimization of credit hours":\s*-?\d+,\s*"Fewer remote classes":\s*-?\d+,\s*"Fewer courses of interest":\s*-?\d+,\s*"Fewer exams":\s*-?\d+\s*\}')
+    json_pattern_class_info = re.compile(r'\{\s*"class_name":\s*"([^"]+)",\s*"teacher":\s*"([^"]*)"\s*\}')
     conversation = LLMChain(
         llm=groq_chat,
         prompt=prompt,
@@ -174,19 +172,57 @@ def NeedRecalc(chat_history: list, param_dict: dict) -> dict:
 
     # 不要なコメント部分を削除して、純粋なJSONデータ部分を取得
     cleaned_response = re.sub(r'//.*', '', response)
+    response_cleaned = re.sub(r'\(.*?\)', '', cleaned_response) # ()内の文言を削除
+    response_cleaned = re.sub(r'\n', '', response_cleaned)
+    print(response_cleaned)
+
+    json_matches = re.findall(r'\{.*?\}', response_cleaned)
 
     # JSONデータの部分を抽出して返す
-    json_data_match = re.search(json_pattern, cleaned_response)
-    if json_data_match:
-        json_data = json_data_match.group(0)
-        return json.loads(json_data) 
+    result = {}
+    for json_str in json_matches:
+        try:
+            json_obj = json.loads(json_str)
+            # 各キーに基づき、どちらのJSONかを判別して格納
+            if "Few early morning classes" in json_obj:
+                result["params"] = json_obj
+            elif "class_name" in json_obj:
+                result["class_info"] = json_obj
+        except json.JSONDecodeError:
+            # JSONとしてパースできなかった場合は無視
+            continue
 
-    return None
+    # パラメータやクラス情報が見つからなければNoneを設定
+    result["params"] = result.get("params", None)
+    result["class_info"] = result.get("class_info", None)
+    print(f"result: {result}")
 
-def generate_response(chat_history: list, param_dict: list, recalc: bool) -> str:
+    return result
+
+def generate_response(chat_history: list, param_dict: list, class_info: dict) -> str:
     """
     ユーザーへのレスポンスを生成する関数
     """
+    print(f"class info: {class_info}")
+    if class_info: 
+        class_data = pd.read_csv(csv_path)
+        teacher_name = class_info.get('teacher', '').replace(' ', '').replace('先生', '')
+        # 関連する授業情報を抽出
+        filtered_data = class_data[
+            (class_data['classname'] == class_info.get('class_name', '')) |
+            (class_data['teacher'].str.replace('　', '').str.replace('先生', '') == teacher_name)
+        ]
+        extracted_info = "\n".join([
+            (
+                f"{row['classname']}の授業は{row['when']}に開講され、"
+                f"担当教員は{row['teacher']}で、テストは{row['test']}、"
+                f"{row['remote']}であり、宿題の量は{row['homework']}、"
+                f"単位数は{row['numofunits']}、学期は{row['semester']}、"
+                f"授業区分は{row['unitclass']}、キーワードは{row['keyword']}、"
+                f"授業概要は{row['classoutline']}です。"
+            )
+            for _, row in filtered_data.iterrows()
+        ])
 
     system_prompt = "あなたは大学の友達．ユーザーが時間割を決定する上で役立ちそうな情報があれば，ユーザーに教えてあげて．回答は全て日本語で行って，友達みたいにフラットにタメ口で話す感じでよろしく!!"
 
@@ -199,6 +235,7 @@ def generate_response(chat_history: list, param_dict: list, recalc: bool) -> str
 
     # 関連コンテキストの取得
     related_docs = retriever.get_relevant_documents(user_input)
+    
     context = "\n".join([doc.page_content for doc in related_docs])
 
     # プロンプトの組み立て
@@ -208,9 +245,13 @@ def generate_response(chat_history: list, param_dict: list, recalc: bool) -> str
         messages.append((role, chat_history[i]))
     print(f"context: {context}")
 
-    # コンテキストをプロンプトに追加
-    messages.append(("system", f"以下の情報を参考にしてください:\n{context}"))
+    if class_info:
+        if extracted_info:
+            messages.append(("system", f"以下の情報を参考にしてください:\n{context}\n{extracted_info}"))
+    else:
+        messages.append(("system", f"以下の情報を参考にしてください:\n{context}"))
 
+    print(messages)
     prompt = ChatPromptTemplate.from_messages(messages)
 
     conversation = LLMChain(
@@ -231,12 +272,12 @@ def generate_response(chat_history: list, param_dict: list, recalc: bool) -> str
 def chat_pipeline(chat_history: list, param_dict: dict) -> str:
 
     # ユーザーからのinputを基にNeedReculcを実行
-    new_params = NeedRecalc(chat_history, param_dict)
-    print(new_params)
+    results = NeedRecalc(chat_history, param_dict)
+    print(f"results2: {results}")
 
     # ユーザーへの回答を生成
-    response = generate_response(chat_history, param_dict, new_params is not None)
-    return response, new_params
+    response = generate_response(chat_history, param_dict, results["class_info"])
+    return response, results["params"]
 
 def test_chatbot():
     chat_history = []

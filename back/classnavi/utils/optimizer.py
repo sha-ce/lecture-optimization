@@ -85,7 +85,7 @@ def optimize_classes(alpha_values, data_path='data.csv', quarter=1, L_early=0, m
         ) +
         -alpha_values[1] * pulp.lpSum(df.loc[i, 'homework'] * x_vars[i] for i in df.index) +  # 宿題が少ない方が良い
         -alpha_values[2] * pulp.lpSum(df.loc[i, 'numofunits_normalized'] * x_vars[i] for i in df.index) +  # 単位数が少ない方が良い
-        -alpha_values[3] * pulp.lpSum(df.loc[i, 'remote'] * x_vars[i] for i in df.index) +  # リモート授業が多い方が良い
+        alpha_values[3] * pulp.lpSum(df.loc[i, 'remote'] * x_vars[i] for i in df.index) +  # リモート授業が少ない方が良い
         alpha_values[4] * pulp.lpSum(df.loc[i, 'similarity'] * x_vars[i] for i in df.index) +  # 類似度が高い授業を選ぶ
         -alpha_values[5] * pulp.lpSum(df.loc[i, 'q_i'] * x_vars[i] for i in df.index) +  # 早朝授業が少ない方が良い
         -alpha_values[6] * pulp.lpSum(df.loc[i, 'test'] * x_vars[i] for i in df.index)    # テストが少ない方が良い
@@ -116,8 +116,6 @@ def optimize_classes(alpha_values, data_path='data.csv', quarter=1, L_early=0, m
     problem += total_units <= max_units, "MaximumUnits"
     total_units_available = df['numofunits'].sum()
     print(f"Available total units: {total_units_available}")
-
-    problem.writeLP("class_selection.lp")
     
     # 最適化
     status = problem.solve(pulp.PULP_CBC_CMD(msg=False))
