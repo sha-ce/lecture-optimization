@@ -65,7 +65,8 @@ llmのAPIのリクエストボディは以下のような形式で入力．
 集中講義や非同期授業をレスポンスに含める関係で以下のようなレスポンスに変更．
 ```
 [{'classname': 'コンピュータアニメーション特論MI', 'formatted_times': '月曜１限 & 木曜３限', 'unitclass': '選必', 'numofunits': 2, 'teacher': '尾下真樹', 'test': 1, 'remote': 1, 'homework': 1.0, 'when': '月曜１限・木曜３限', 'semester': '第1クォーター', 'l_i': [1, 3]}, {'classname': '人工知能特論MI', 'formatted_times': '集中講義', 'unitclass': '選必', 'numofunits': 2, 'teacher': '平田耕一', 'test': 1, 'remote': 0, 'homework': 0.0, 'when': '集中講義', 'semester': '前期', 'l_i': []}, 
-{'classname': '算法表現特論MI', 'formatted_times': '月曜５限 & 木曜４限', 'unitclass': '選必', 'numofunits': 2, 'teacher': '中村貞吾', 'test': 1, 'remote': 0, 'homework': 0.0, 'when': '月曜５限・木曜４限', 'semester': '第1クォーター', 'l_i': [5, 4]}]
+{'classname': '算法表現特論MI', 'formatted_times': '月曜５限 & 木曜４限', 'unitclass': '選必', 'numofunits': 2, 'teacher': '中村貞吾', 'test': 1, 'remote': 0, 'homework': 0.0, 'when': '月曜５限・木曜４限', 'semester': '第1クォーター', 'l_i': [5, 4]},
+{'classname': '並列分散アルゴリズム', 'formatted_times': '非同期', 'unitclass': '選必', 'numofunits': 2, 'teacher': '藤原暁宏', 'test': 1, 'remote': 0, 'homework': 0.0, 'when': '非同期', 'semester': '第1クォーター', 'l_i': []}]
 ```
 
 ## frontend
