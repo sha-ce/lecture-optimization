@@ -209,9 +209,10 @@ def generate_response(chat_history: list, param_dict: list, class_info: dict) ->
         teacher_name = class_info.get('teacher', '').replace(' ', '').replace('先生', '')
         # 関連する授業情報を抽出
         filtered_data = class_data[
-            (class_data['classname'] == class_info.get('class_name', '')) |
+            (class_data['classname'].str.contains(f"^{re.escape(class_info.get('class_name', ''))}", regex=True)) |
             (class_data['teacher'].str.replace('　', '').str.replace('先生', '') == teacher_name)
         ]
+
         extracted_info = "\n".join([
             (
                 f"{row['classname']}の授業は{row['when']}に開講され、"
