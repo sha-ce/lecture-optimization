@@ -221,6 +221,7 @@ def generate_response(chat_history: list, param_dict: list, class_info: dict) ->
                 f"単位数は{row['numofunits']}、学期は{row['semester']}、"
                 f"授業区分は{row['unitclass']}、キーワードは{row['keyword']}、"
                 f"授業概要は{row['classoutline']}です。"
+                f"講義の種類は{row['class']}、コースは{row['course']}。"
             )
             for _, row in filtered_data.iterrows()
         ])
