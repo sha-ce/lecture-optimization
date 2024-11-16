@@ -60,6 +60,14 @@ llmのAPIのリクエストボディは以下のような形式で入力．
 }
 ```
 
+### backendの仕様変更
+<br>2024-11-17</br>
+集中講義や非同期授業をレスポンスに含める関係で以下のようなレスポンスに変更．
+```
+[{'classname': 'コンピュータアニメーション特論MI', 'formatted_times': '月曜１限 & 木曜３限', 'unitclass': '選必', 'numofunits': 2, 'teacher': '尾下真樹', 'test': 1, 'remote': 1, 'homework': 1.0, 'when': '月曜１限・木曜３限', 'semester': '第1クォーター', 'l_i': [1, 3]}, {'classname': '人工知能特論MI', 'formatted_times': '集中講義', 'unitclass': '選必', 'numofunits': 2, 'teacher': '平田耕一', 'test': 1, 'remote': 0, 'homework': 0.0, 'when': '集中講義', 'semester': '前期', 'l_i': []}, 
+{'classname': '算法表現特論MI', 'formatted_times': '月曜５限 & 木曜４限', 'unitclass': '選必', 'numofunits': 2, 'teacher': '中村貞吾', 'test': 1, 'remote': 0, 'homework': 0.0, 'when': '月曜５限・木曜４限', 'semester': '第1クォーター', 'l_i': [5, 4]}]
+```
+
 ## frontend
 [demo動画](./frontend/demo.mp4)
 - 条件など諸項目選択ページ[`index.html`](./frontend/index.html)
@@ -85,6 +93,8 @@ llmのAPIのリクエストボディは以下のような形式で入力．
 - [x] 講義のステージング時、同じ名前の講義を連動させる(Frontend)
 - [ ] 登録の際に凍結・固定するような機能(Frontend)
 - [ ] 絶対に取りたくない講義も選択できるような機能．
+- [ ] specialのメディア情報学，データ科学，人工知能以外の授業を選択できないようにする（利用するデータに含まれていないため）
+- [ ] socialのAI応用，金融流通，ソフトウェア開発プロセス，画像認識，アントレプレナーシップ以外の講義を選択できないようにする（利用するデータに含まれていないため）
 ### Backend
 - [x] LLMによるエージェントのAPI実装(Backend)
 - [x] 既習単位の排除アルゴリズム(Backend)

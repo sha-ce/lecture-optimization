@@ -21,19 +21,21 @@ async def get_items(item: str = Form(...), pdf_file: Optional[UploadFile] = File
 
     result = optimize_classes(
         alpha_values=[int(alpha) for alpha in item_data['alphas']],
-        data_path='./classnavi/data_old/data_old.csv',
+        data_path='./classnavi/datas/after.csv',
         quarter=int(item_data['quarter']),
         L_early=int(item_data['l_early']),
         min_units=int(item_data['units'][0]),
         max_units=int(item_data['units'][1]),
         keywords=item_data['keywords'],
         pdf_content=None,
-        must_select_classes=item_data['must_select_classes']
+        must_select_classes=item_data['must_select_classes'],
+        special=item_data['special'],
+        social=item_data['social']
     )
 
     try:
         result_data = json.loads(result)
-        # print(result_data)
+        print(result_data)
     except json.JSONDecodeError as e:
         print("JSONDecodeError:", str(e))
         print("Returned data:", result)
@@ -49,7 +51,7 @@ def get_courses_percell(info: Cell):
     day_time_dict = {d_jp+t_jp: d_en+t_en for d_jp, d_en in days.items() for t_jp, t_en in times.items()}
 
     # CSVファイルから授業データを読み込む
-    df = pd.read_csv('./classnavi/data_old/data_old.csv')
+    df = pd.read_csv('./classnavi/datas/after.csv')
     # 指定された楽器に一致するデータのみを抽出し，インデックスをリセット
     df = df[df.semester==info.quarter].reset_index(drop=True)
 

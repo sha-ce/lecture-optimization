@@ -21,7 +21,7 @@ import pandas as pd
 groq_api_key = os.getenv("GROQ_API")
 groq_chat = ChatGroq(groq_api_key=groq_api_key, model_name="llama3-70b-8192")
 embeddings = GoogleGenerativeAIEmbeddings(model="models/embedding-001", task_type="retrieval_document")
-csv_path = "classnavi/data_old/data_old.csv"
+csv_path = "classnavi/datas/after.csv"
 
 def create_class_documents(data_path: str):
     """
@@ -224,7 +224,7 @@ def generate_response(chat_history: list, param_dict: list, class_info: dict) ->
             for _, row in filtered_data.iterrows()
         ])
 
-    system_prompt = "あなたは大学の友達．ユーザーが時間割を決定する上で役立ちそうな情報があれば，ユーザーに教えてあげて．回答は全て日本語で行って，友達みたいにフラットにタメ口で話す感じでよろしく!!"
+    system_prompt = "あなたは大学の友達．ユーザーが時間割を決定する上で役立ちそうな情報があれば，ユーザーに教えてあげて．回答は全て日本語で行って，友達みたいにフラットにタメ口で話す感じでよろしく．だけど回答は絶対に与えられた情報だけを使って行いなさい．"
 
     # チャット履歴が10を超える場合は最新の10件に制限する
     if len(chat_history) > 10:
@@ -247,9 +247,9 @@ def generate_response(chat_history: list, param_dict: list, class_info: dict) ->
 
     if class_info:
         if extracted_info:
-            messages.append(("system", f"以下の情報を参考にしてください:\n{context}\n{extracted_info}"))
+            messages.append(("system", f"以下の情報を基に回答を生成してください:\n{context}\n{extracted_info}"))
     else:
-        messages.append(("system", f"以下の情報を参考にしてください:\n{context}"))
+        messages.append(("system", f"以下の情報を基に回答を生成してください:\n{context}"))
 
     print(messages)
     prompt = ChatPromptTemplate.from_messages(messages)

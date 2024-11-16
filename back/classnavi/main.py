@@ -57,7 +57,7 @@ if __name__ == "__main__":
     alpha_values, L_early, min_units, max_units, user_prefer = get_user_input()
     
     # 授業選択の最適化
-    result = optimize_classes(alpha_values, 'classnavi/data_old/data_old.csv', L_early, min_units, max_units, user_prefer, "/Users/furuyatatsuma/Downloads/seisekiTsuuchiPrint (1).PDF")
+    result = optimize_classes(alpha_values, '/lectopt/back/classnavi/datas/after.csv', L_early, min_units, max_units, user_prefer, "/Users/furuyatatsuma/Downloads/seisekiTsuuchiPrint (1).PDF")
     print(result)
     
     # JSON形式の文字列を辞書形式に変換
