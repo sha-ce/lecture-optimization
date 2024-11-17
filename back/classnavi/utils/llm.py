@@ -195,7 +195,6 @@ def NeedRecalc(chat_history: list, param_dict: dict) -> dict:
     # パラメータやクラス情報が見つからなければNoneを設定
     result["params"] = result.get("params", None)
     result["class_info"] = result.get("class_info", None)
-    print(f"result: {result}")
 
     return result
 
@@ -203,15 +202,41 @@ def generate_response(chat_history: list, param_dict: list, class_info: dict) ->
     """
     ユーザーへのレスポンスを生成する関数
     """
-    print(f"class info: {class_info}")
     if class_info: 
+        # CSVの読み込み
         class_data = pd.read_csv(csv_path)
-        teacher_name = class_info.get('teacher', '').replace(' ', '').replace('先生', '')
-        # 関連する授業情報を抽出
-        filtered_data = class_data[
-            (class_data['classname'].str.contains(f"^{re.escape(class_info.get('class_name', ''))}", regex=True)) |
-            (class_data['teacher'].str.replace('　', '').str.replace('先生', '') == teacher_name)
-        ]
+        print(class_data.head())
+
+        # teacher_name の取得と正規化
+        teacher_name_raw = class_info.get('teacher', '')
+        teacher_name_normalized = teacher_name_raw.replace(' ', '').replace('　', '').replace('先生', '')
+
+        # class_name の取得
+        class_name = class_info.get('class_name', '')
+
+        # teacher 列を正規化（欠損値や空文字列に対応）
+        class_data['teacher_normalized'] = class_data['teacher'].fillna('').str.replace(' ', '').replace('　', '')
+
+        # 条件に基づくデータフィルタリング
+        if class_name and teacher_name_normalized:  # 両方が指定されている場合
+            filtered_data = class_data[
+                (
+                    class_data['classname'].str.contains(f"{re.escape(class_name)}", regex=True)
+                ) |
+                (
+                    class_data['teacher_normalized'].str.contains(re.escape(teacher_name_normalized), regex=True)
+                )
+            ]
+        elif class_name:  # class_name のみ指定されている場合
+            filtered_data = class_data[
+                class_data['classname'].str.contains(f"{re.escape(class_name)}", regex=True)
+            ]
+        elif teacher_name_normalized:  # teacher_name のみ指定されている場合
+            filtered_data = class_data[
+                class_data['teacher_normalized'].str.contains(re.escape(teacher_name_normalized), regex=True)
+            ]
+        else:
+            filtered_data = pd.DataFrame()  # 条件に合うものがない場合は空の DataFrame
 
         extracted_info = "\n".join([
             (
@@ -245,7 +270,7 @@ def generate_response(chat_history: list, param_dict: list, class_info: dict) ->
     for i in range(len(chat_history)):
         role = "ai" if i % 2 == 0 else "human"
         messages.append((role, chat_history[i]))
-    print(f"context: {context}")
+    # print(f"context: {context}")
 
     if class_info:
         if extracted_info:
@@ -253,7 +278,7 @@ def generate_response(chat_history: list, param_dict: list, class_info: dict) ->
     else:
         messages.append(("system", f"以下の情報を基に回答を生成してください:\n{context}"))
 
-    print(messages)
+    # print(messages)
     prompt = ChatPromptTemplate.from_messages(messages)
 
     conversation = LLMChain(
@@ -263,7 +288,6 @@ def generate_response(chat_history: list, param_dict: list, class_info: dict) ->
     )
 
     response = conversation.predict(input=user_input)
-    print(response)
 
     chat_history.append(response)
     new_chat_history = chat_history
@@ -275,7 +299,6 @@ def chat_pipeline(chat_history: list, param_dict: dict) -> str:
 
     # ユーザーからのinputを基にNeedReculcを実行
     results = NeedRecalc(chat_history, param_dict)
-    print(f"results2: {results}")
 
     # ユーザーへの回答を生成
     response = generate_response(chat_history, param_dict, results["class_info"])
