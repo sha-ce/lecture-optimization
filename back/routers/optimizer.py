@@ -50,6 +50,7 @@ def get_courses_percell(info: Cell):
     # 日本語の曜日・時限の組み合わせを英語の曜日・時限に変換する辞書を作成
     day_time_dict = {d_jp+t_jp: d_en+t_en for d_jp, d_en in days.items() for t_jp, t_en in times.items()}
     day_time_dict['非同期'] = '非同期'
+    day_time_dict['集中講義'] = '集中講義'
 
     # CSVファイルから授業データを読み込む
     df = pd.read_csv('./classnavi/datas/after.csv')

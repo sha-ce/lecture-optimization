@@ -56,7 +56,7 @@
     background-color: #fff;
     font-size: 0.6rem;
     padding: 5px;
-    margin: 0;
+    margin: 2px;
     border-radius: 2px;
     width: 100%;
     height: 100%;
@@ -91,7 +91,7 @@
     box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.1);
     padding: 20px;
     overflow-y: auto;
-    height: 61vh;
+    height: 62vh;
     transition: 0.3s;
     z-index: 99;
 }
@@ -126,4 +126,48 @@
 
 #antiload p {
     text-align: right;
+}
+
+
+
+
+
+
+.timetable-others {
+    display: flex;
+    justify-content: space-around;
+    width: 100%;
+}
+.timetable-other {
+    width: 100%;
+}
+.timetable-other button {
+    background-color: #aaa;
+    color: white;
+    border: none;
+    border-radius: 30%;
+    width: 15px;
+    height: 15px;
+    line-height: 15px;
+    font-size: 15px;
+    cursor: pointer;
+    padding-bottom: 2px;
+    margin-left: 10px;
+}
+.timetable-other button:hover {
+    background-color: #444;
+    transition: 0.3s;
+}
+
+.course-others {
+    width: 95%;
+    font-size: 0.6rem;
+    padding: 5px 0 5px 20px;
+    margin: 5px;
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+
+.course-fixed {
+    border: solid 1px #000;
 }

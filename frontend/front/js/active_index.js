@@ -115,23 +115,13 @@ for (let i=0; i<keywords.length; i++) {           // [process] キーワード�
     el_key.insertAdjacentHTML("beforeend", incode);
 }
 
-///////////////////////////////
+////////////////////////////
 // 必須選択クラス用スクリプト //
-///////////////////////////////
-let must_select_classes = [];
-if (localStorage.hasOwnProperty('must_select_classes')) {
-    try {
-        const storedClasses = localStorage.getItem('must_select_classes');
-        must_select_classes = storedClasses ? JSON.parse(storedClasses) : [];
-        localStorage.setItem('must_select_classes', JSON.stringify(must_select_classes));
-    } catch (e) {
-        console.error("Failed to parse must_select_classes from localStorage:", e);
-        must_select_classes = [];
-    }
-} else {
-    console.log(localStorage.hasOwnProperty('must_select_classes'))
-    localStorage.setItem('must_select_classes', JSON.stringify(must_select_classes)); // 初回実行時は空のリストを保存
+////////////////////////////
+if (!localStorage.hasOwnProperty('must_select_classes')) {
+    localStorage.setItem('must_select_classes', JSON.stringify([])); // 初回実行時は空のリストを保存
 }
+
 
 /////////////////////////////////
 // 成績通知書アップロードスクリプト //

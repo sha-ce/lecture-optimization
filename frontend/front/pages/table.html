@@ -26,28 +26,34 @@
             </div>
             <!-- time table -->
             <h1>時間割</h1>
-            <div id="antiload">
+            <div id="antiload" oncontextmenu="return false;">
                 <p>単位数： <input type="number" id="units-sum" min="0" value=null readonly></p>
                 <table class="timetable">
                     <thead><tr id="table-columns"></tr></thead>
                     <tbody id="table-body"></tbody>
                 </table>
+                <div class="timetable-others">
+                    <div class="timetable-other"><h3>時間割外講義<button onclick="popup(this, isOthers=true)">+</button></h3><div id="anytime" class="cell-others"></div></td></div>
+                    <div class="timetable-other"><h3>集中講義<button onclick="popup(this, isOthers=true)">+</button></h3><div id="intensive" class="cell-others"></div></div>
+                </div>
             </div>
             <div id="loader" class="sk-fading-circle"></div>
         </div>
     </div>
 
     <!-- 選択されたセルのポップアップウィンドウ -->
-    <div id="popup-window" class="popup">
+    <div id="popup-window" class="popup" oncontextmenu="return false;">
         <div class="popup-content">
           <button id="close-popup-window" class="close" onclick="hidePopup()">×</button>
           <div id="popup-classes"></div>
           <div class="button-wrapper">
             <button type="submit" id="submit" class="submit popup-button" onclick="setLecture()">登録</button>
-            <button onclick="setFixedLecture()" class="submit"><i class="fa-regular fa-snowflake"></i> 固定して登録</button>
         　</div>
         </div>
     </div>
+
+    <!-- ポップアップウィンドウ内の講義を右クリックした時に表示する授業詳細情報 -->
+    <div id="class-details" style="display: none;"></div>
 
     <!-- LLM Chat ウィンドウ -->
     <div id="dialog" class="dialog-content" style="display: none;">

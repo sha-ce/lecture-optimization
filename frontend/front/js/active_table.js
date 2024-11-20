@@ -21,14 +21,6 @@ function optimize() {
     new Promise((resolve, reject) => {             // [process] 10msの後、ローカルストレージのデータをget()によりbackに送信し講義情報を受け取る
         setTimeout(() => {resolve(); }, 10);       // リロード直後にget()するとlocalstrageアクセスが競合してうまくいかないので10ms遅延させる
     }).then(() => {
-        let mustSelectClasses = localStorage.getItem('must_select_classes');
-        if (mustSelectClasses) {
-            // パースしてから再度stringのリストに戻す
-            mustSelectClasses = mustSelectClasses.split(',');
-            console.log(mustSelectClasses);
-        } else {
-            mustSelectClasses = []; // もしも存在しなければ空リスト
-        }
         let data = {
             compulsory: localStorage.getItem('compulsory'),
             quarter: localStorage.getItem('quarter').replace('Q', ''),
@@ -38,7 +30,7 @@ function optimize() {
             l_early: localStorage.getItem('l_early'),
             units: localStorage.getItem('units').split(',').map(Number),
             keywords: localStorage.getItem('keywords'),
-            must_select_classes: mustSelectClasses.join(","),
+            must_select_classes: localStorage.getItem('must_select_classes').split(','),
         }
         get(data); // defined in script.js
     });
