@@ -24,7 +24,8 @@ function optimize() {
         let mustSelectClasses = localStorage.getItem('must_select_classes');
         if (mustSelectClasses) {
             // パースしてから再度stringのリストに戻す
-            mustSelectClasses = JSON.parse(mustSelectClasses).map(String);
+            mustSelectClasses = mustSelectClasses.split(',');
+            console.log(mustSelectClasses);
         } else {
             mustSelectClasses = []; // もしも存在しなければ空リスト
         }
@@ -37,10 +38,9 @@ function optimize() {
             l_early: localStorage.getItem('l_early'),
             units: localStorage.getItem('units').split(',').map(Number),
             keywords: localStorage.getItem('keywords'),
-            must_select_classes: mustSelectClasses.join(", "),
+            must_select_classes: mustSelectClasses.join(","),
         }
         get(data); // defined in script.js
-        setUnitNum()
     });
 }
 optimize();

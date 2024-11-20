@@ -141,6 +141,8 @@ function fill() {
     initTable()
     let classes = JSON.parse(localStorage.getItem('table'));
     for (let [_,c] of Object.entries(classes)) { for (let id of c.whenid) {
+        if (id == null && c.when == '集中講義') { console.log(c.when); continue; }
+        else if (id == null && c.when == '非同期') { console.log(c.when); continue; }
         let el = document.getElementById(id);
         let incode = `
             <div id="${id}-course" class="course" onclick="popup(this)">
@@ -148,6 +150,9 @@ function fill() {
             </div>`
         el.insertAdjacentHTML("afterbegin", incode);
     }}
+    new Promise((resolve, reject) => {
+        setTimeout(() => {resolve(); }, 100);
+    }).then(() => { setUnitNum(); });
 };
 
 
@@ -216,7 +221,7 @@ function popup(cell) {
         method: "POST",
         headers: {"Content-Type": "application/json"},
         body: JSON.stringify({
-            quarter: {'Q1': 1, 'Q2': 2, 'Q3': 3, 'Q4': 4}[localStorage.getItem('quarter')],
+            quarter: {'Q1': '第1クォーター', 'Q2': '第2クォーター', 'Q3': '第3クォーター', 'Q4': '第4クォーター'}[localStorage.getItem('quarter')],
             daytime: cell.parentNode.id
         }),
     }
@@ -224,6 +229,7 @@ function popup(cell) {
     fetch(url, config)
     .then(data => { return data.json(); })
     .then(res  => {
+        console.log(JSON.parse(res)['data']);
         setCand(JSON.parse(res)['data'], cell.parentNode.id.split('-'));
     })
     .catch(e   => {
@@ -273,7 +279,11 @@ function outStage(e) {
 }
 function setLecture() {
     function textContent(e) { return e.querySelector('ul').firstChild.textContent; }
-    function getExDaytime(c, dt) { let cw = c.whenid; if(cw.length==2){if(cw[0]==dt){return [cw[1],c.when.split('・')[1]];}else{return [cw[0],c.when.split('・')[0]];}}}
+    function getExDaytime(c, dt) {
+        let cw = c.whenid; 
+        if(cw.length==2){ if(cw[0]==dt){ return [cw[1],c.when.split('・')[1]]; } else{ return [cw[0],c.when.split('・')[0]]; }
+        } else { return [cw[0], null] }
+    }
     let must_select_classes = [];
     if (localStorage.hasOwnProperty('must_select_classes')) {
         try {
@@ -297,8 +307,6 @@ function setLecture() {
             resolve();
         }, 10)}).then(() => { fill(); hidePopup(); });
     }
-    setUnitNum();
-    
     let table = JSON.parse(localStorage.getItem('table'));           // [var] localのtable
     let filled_daytimes = getFillDaytimes(table);                    // [var] tableに埋まっている講義の曜日時限
     let candidates = JSON.parse(localStorage.getItem('candidates')); // [var] 選択したセルの曜日時限と一致する講義候補
@@ -309,7 +317,7 @@ function setLecture() {
     if (e.children[1].tagName == 'BUTTON') {                         // [cond] 講義がステージングされている時（講義を追加する時）
         let candidate = candidates[textContent(e.children[1])];           // [var] ステージングされた講義
         let [i, ijp] = getExDaytime(candidate, daytime);                  // [var] ステージングされた講義の選択している曜日時限以外の曜日時限
-        if (i in filled_daytimes) {                                       // [cond] 追加する時にconflictがあった時
+        if (i in filled_daytimes && ijp != null) {                        // [cond] 追加する時にconflictがあった時
             let conflicted_class = document.getElementById(`${i}-course`) // [var] コンフリクトされた側の講義
             if (textContent(conflicted_class) != candidate.classname) {
                 result = confirm(
@@ -320,6 +328,8 @@ function setLecture() {
             } else { hidePopup(); }
         } else { f(table, le=[lec_e], e=e.children[1], c=candidate); }      // [cond] 追加時のconflictがなかった時
     } else { f(table, le=[lec_e]); }                                 // [cond] 講義が何もステージングされていない時（講義を削除する時）
+
+    new Promise((resolve, reject) => { setTimeout(() => {resolve(); }, 10); }).then(() => { setUnitNum(); });
 }
 
 function setFixedLecture() {

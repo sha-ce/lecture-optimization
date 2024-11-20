@@ -14,7 +14,7 @@ class Item(BaseModel):
     must_select_classes: list
 
 class Cell(BaseModel):
-    quarter: int=1
+    quarter: str='第1クォーター'
     daytime: str='mon-1'
 
 class ChatInput(BaseModel):
