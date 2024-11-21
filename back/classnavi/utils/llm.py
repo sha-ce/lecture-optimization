@@ -306,7 +306,7 @@ def chat_pipeline(chat_history: list, param_dict: dict) -> str:
 
 def test_chatbot():
     chat_history = []
-    agent_talk = "僕はみんなの要望を受けて，時間割の提案を変更するエージェントだよ．何か要望があれば言ってね．回答は一言で簡潔にお願い．"
+    agent_talk = "僕はみんなの要望を受けて，時間割の提案を変更するエージェントだよ．何か要望があれば言ってね．回答は一言で簡潔にお願い．それと絶対に与えられた情報だけを使って回答して．もし，授業情報がプロンプトに含まれていない場合は，「ごめん，それはわからない」とはっきり言って．"
     print(agent_talk)
     chat_history.append(agent_talk)
     param = {'Few early morning classes': 2, 'Optimization of class days': 0, 'Fewer assignments': 0, 'Optimization of credit hours': 0, 'Fewer remote classes': 0, 'Fewer courses of interest': 0, 'Fewer exams': 0}
