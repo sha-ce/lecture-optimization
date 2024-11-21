@@ -49,13 +49,13 @@ function setInfo() { // [func] localstrageから情報を取ってきてyour inf
     let a = localStorage.getItem('alphas').split(',').map(Number);
     let astr = '';
     s =  [
-        ['授業日数 ', 'どうでもいい', '多め', '少なめ'],
-        ['課題の量 ', 'どうでもいい', '多め', '少なめ'],
-        ['単位数 ', 'どうでもいい', '多め', '少なめ'],
-        ['対面か遠隔 ', 'どっちでもいい', '→ 対面', '→ 遠隔'],
-        ['興味関心 ', '考慮しない', '無視する', '優先する'],
-        ['朝は ', '弱くも強くもない', '強い', '弱い'],
-        ['試験 ', '考慮しない', '大好き', '大嫌い'],
+        ['授業日数', '　　　どうでもいい　　　　', '　　　多め　　　　　　　　', '　　　少なめ　　　　　　　'],
+        ['課題の量', '　　　どうでもいい　　　　', '　　　多め　　　　　　　　', '　　　少なめ　　　　　　　'],
+        ['単位数', '　　　　どうでもいい　　　　', '　　　　多め　　　　　　　　', '　　　　少なめ　　　　　　　'],
+        ['対面か遠隔', '　　どっちでもいい　　　', '　　対面　　　　　　　　', '　　遠隔　　　　　　　　'],
+        ['興味関心', '　　　考慮しない　　　　　', '　　　無視する　　　　　　', '　　　優先する　　　　　　'],
+        ['朝は', '　　　　　弱くも強くもない　　', '　　　　　強い　　　　　　　　', '　　　　　弱い　　　　　　　　'],
+        ['試験は', '　　　　考慮しない　　　　　', '　　　　大好き　　　　　　　', '　　　　大嫌い　　　　　　　'],
     ];
     for (let i=0; i<s.length; i++) { astr += `<p>${s[i][0]} ` + ((a[i]==0)?`${s[i][1]}（${a[i]}）`:(a[i]<0)?`${s[i][2]}（${-a[i]}）`:`${s[i][3]}（${a[i]}）`)+`</p>`; }
 
@@ -70,9 +70,6 @@ function setInfo() { // [func] localstrageから情報を取ってきてyour inf
         <p>単位数 ${units[0]} 単位以上, ${units[1]} 単位以下</p>
         <h3>Keywords</h3>
         <p>${localStorage.getItem('keywords')}</p>
-        <div class="button-wrapper">
-        <button type="submit" id="submit" class="submit" onclick="window.location.assign('../../index.html');">条件調整</button>
-        </div>
     `;
     selected_conditions.insertAdjacentHTML("beforeend", conditions_code);
 }

@@ -141,7 +141,6 @@ function fill() {
     initTable();
     let classes = JSON.parse(localStorage.getItem('table'));
     let fixed_classes = localStorage.getItem('must_select_classes').split(',');
-    console.log(fixed_classes)
 
     for (let [name, c] of Object.entries(classes)) {
         let fixed_style = fixed_classes.includes(name) ? 'course-fixed' : '';
@@ -319,42 +318,39 @@ function outStage(e, isOthers=false) {
     }
 }
 function setLecture() {
+    // [func] 授業エレメントの授業名を返す関数
     function textContent(e) { return e.querySelector('ul').firstChild.textContent; }
-    function getExDaytime(c, dt) {
-        let cw = c.whenid; 
-        if(cw.length==2){ if(cw[0]==dt){ return [cw[1],c.when.split('・')[1]]; } else{ return [cw[0],c.when.split('・')[0]]; }
-        } else { return [cw[0], null] }
-    }
-    function f(t, le, e=null, c=null) {                             // [func] 最終的に講義の追加や削除をする関数
-        new Promise((resolve, reject) => {setTimeout(() => {
-            for(let l of le) { if (l != null) { delete t[textContent(l)]; }}
-            if (c != null) { t[c.classname] = c; }
-            localStorage.setItem('table', JSON.stringify(t)); 
-            resolve();
-        }, 10)}).then(() => { fill(); hidePopup(); });
-    }
-    let table = JSON.parse(localStorage.getItem('table'));           // [var] localのtable
-    let filled_daytimes = getFillDaytimes(table);                    // [var] tableに埋まっている講義の曜日時限
-    let candidates = JSON.parse(localStorage.getItem('candidates')); // [var] 選択したセルの曜日時限と一致する講義候補
-    let e = document.getElementById('classes-wrapper');              // [var] 選択したセルの曜日時限と一致する講義の親エレメント
-    let daytime = e.children[0].getAttribute('value');               // [var] 選択したセルの曜日時限
-    let lec_e = document.getElementById(`${daytime}-course`);        // [var] 選択したセルに既にセットされている講義
+    // [func] ボタンが押された時にステージングされている講義を返す関数
+    function getStagedClasses(es, cands) { let staged = {}; let i=1; while(es[i].tagName != 'DIV') { staged[textContent(es[i])] = cands[textContent(es[i])]; i++; } return staged; }
+     // [func] ボタンが押された時にステージングされていない講義を返す関数
+    function getUnStagedClasses(es, cands) { let unstaged = {};let start = false;for (let i=0; i<es.length; i++){if (start) {let name = textContent(es[i]);unstaged[name] = cands[name];}if (es[i].tagName == 'DIV') {start = true;}}return unstaged;}
+    // [func] 普通のテーブルに乗せるべき講義か、非同期もしくは集中講義であるかの判定
+    function isOthersTable(staged, unstaged) {if (Object.keys(staged).length > 0) {if (['非同期', '集中講義'].includes(Object.entries(staged)[0][1].when)) {return true;} else { return false; }} else if (Object.keys(unstaged).length > 0) {if (['非同期', '集中講義'].includes(Object.entries(unstaged)[0][1].when)) {return true;} else { return false; }} else {hidePopup();}}
+    // [func] ステージングされている講義の中で週2で開講される講義を対象に、選択されたセルの曜日時限ではない方の曜日時限を取得する関数
+    function getExDaytime(staged, daytime) {let when = Object.entries(staged)[0][1].whenid; if (when.length == 2) {if(when[0] == daytime) {return [when[1], Object.entries(staged)[0][1].when.split('・')[1]]; } else {return [when[0], Object.entries(staged)[0][1].when.split('・')[0]]; }} else {return [when[0], null]}}
+    // [func] 最終的に講義の追加や削除をする関数
+    function execute(table, deletes=[null], adds=[[null, null]]) {new Promise((resolve, reject) => {setTimeout(() => {for(let del of deletes) { del != null && delete table[textContent(del)]; } for(let [_, add] of adds) {if (add != null) {table[add.classname] = add; }} localStorage.setItem('table', JSON.stringify(table)); resolve();}, 10)}).then(() => { fill(); hidePopup(); })}
+    // [func] コンフリクトを起こした時の処理
+    function conflictionProcess(table, staged, ex, wjp, filled, set) {let conflicting = Object.entries(staged)[0][1]; let conflicted = document.getElementById(`${ex}-course`); if (ex in filled) {if (textContent(conflicted) != conflicting.classname && wjp != null) { result = confirm(`"${wjp}"でコンフリクトが発生しました。\n「${textContent(conflicted)}」を削除して「${conflicting.classname}」を登録しますか？`); if (result) { execute(table, deletes=[set, conflicted], adds=[[null, conflicting]]); } else { hidePopup(); }} else {execute(table, deletes=[set, conflicted], adds=[[null, conflicting]]);}} else { execute(table, deletes=[set], adds=[[null, conflicting]]); }}
+    // [func] 通常時の処理
+    function usualProcess(table, staged_candidates, daytime, filled_daytimes, set_lecture) {if (Object.keys(staged_candidates).length > 0) {let [when_ex, when_jp] = getExDaytime(staged_candidates, daytime);conflictionProcess(table, staged_candidates, when_ex, when_jp, filled_daytimes, set_lecture);} else {execute(table, deletes=[set_lecture]);}}
+    // [func] 非同期講義や集中講義の時の処理
+    function othersProcess(table, staged, unstaged) {let adds = [[null, null]];for (let [k, c] of Object.entries(staged)) {if (!Object.keys(table).includes(k)) {adds.push([k, c]);}}for (let [k, _] of Object.entries(unstaged)) {if (Object.keys(table).includes(k)) {delete table[k];}}execute(table, deletes=[null], adds=adds);}
 
-    if (e.children[1].tagName == 'BUTTON') {                         // [cond] 講義がステージングされている時（講義を追加する時）
-        let candidate = candidates[textContent(e.children[1])];           // [var] ステージングされた講義
-        let [i, ijp] = getExDaytime(candidate, daytime);                  // [var] ステージングされた講義の選択している曜日時限以外の曜日時限
-        if (i in filled_daytimes && ijp != null) {                        // [cond] 追加する時にconflictがあった時
-            let conflicted_class = document.getElementById(`${i}-course`) // [var] コンフリクトされた側の講義
-            if (textContent(conflicted_class) != candidate.classname) {
-                result = confirm(
-                    `"${ijp}"でコンフリクトが発生しました。\n`+
-                    `「${textContent(conflicted_class)}」を削除して「${candidate.classname}」を登録しますか？`
-                );
-                if (result) { f(table, le=[lec_e, conflicted_class], e=e.children[1], c=candidate); } else { hidePopup(); }
-            } else { hidePopup(); }
-        } else { f(table, le=[lec_e], e=e.children[1], c=candidate); }      // [cond] 追加時のconflictがなかった時
-    } else { f(table, le=[lec_e]); }                                 // [cond] 講義が何もステージングされていない時（講義を削除する時）
+    let table = JSON.parse(localStorage.getItem('table'));            // [var] localのtable
+    let filled_daytimes = getFillDaytimes(table);                     // [var] tableに埋まっている講義の曜日時限
+    let e = document.getElementById('classes-wrapper');               // [var] 選択したセルの曜日時限と一致する講義の親エレメント
+    let daytime = e.children[0].getAttribute('value');                // [var] 選択したセルの曜日時限
+    let set_lecture = document.getElementById(`${daytime}-course`);   // [var] 選択したセルに既にセットされている講義
+    let candidates = JSON.parse(localStorage.getItem('candidates'));  // [var] 選択したセルの曜日時限と一致する講義候補(popupに表示される講義)
+    let staged_candidates = getStagedClasses(e.children, candidates); // [var] ステージングされている講義
+    let unstaged = getUnStagedClasses(e.children, candidates);        // [var] ステージングされている講義
 
+    if (isOthersTable(staged_candidates, unstaged)) {
+        othersProcess(table, staged_candidates, unstaged);
+    } else {
+        usualProcess(table, staged_candidates, daytime, filled_daytimes, set_lecture);
+    }
     new Promise((resolve, reject) => { setTimeout(() => {resolve(); }, 10); }).then(() => { setUnitNum(); });
 }
 
@@ -382,7 +378,12 @@ function setFixedLecture(e) {
 function classDetails(el) {
     let win = document.getElementById('class-details');
     while (win.firstChild) { win.removeChild(win.firstChild); }
-    document.getElementById('popup-window').addEventListener('contextmenu', function(e) { win.style.left = e.pageX+'px'; win.style.top = e.pageY+'px'; win.style.display = 'block'; });
+    document.getElementById('popup-window').addEventListener('contextmenu', function(e) { 
+        win.style.left = `${e.pageX}px`;
+        if (e.clientY+400 > window.innerHeight) { win.style.bottom = '10px'; }
+        else { win.style.top = `${e.clientY}px`; }
+        win.style.display = 'block'; 
+    });
 
     let class_name = el.querySelector('ul').firstChild.textContent;
     let class_info = JSON.parse(localStorage.getItem('candidates'))[class_name]
