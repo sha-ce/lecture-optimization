@@ -77,12 +77,19 @@
 #class-details {
     position: fixed;
     width: min(300px, 50%);
+    max-height: 400px;
+    overflow-y: auto;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
     padding: 10px 5px;
     background-color: rgba(0,0,0,0.5);
     backdrop-filter: blur(3px);
     z-index: 9999;
     border-radius: 5px;
     box-shadow: 1px 1px 5px rgba(0, 0, 0, 0.3);
+}
+#class-details::-webkit-scrollbar {
+    display:none;
 }
 #class-details p {
     color: #fefefe;

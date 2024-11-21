@@ -141,7 +141,6 @@ function fill() {
     initTable();
     let classes = JSON.parse(localStorage.getItem('table'));
     let fixed_classes = localStorage.getItem('must_select_classes').split(',');
-    console.log(fixed_classes)
 
     for (let [name, c] of Object.entries(classes)) {
         let fixed_style = fixed_classes.includes(name) ? 'course-fixed' : '';
@@ -382,7 +381,12 @@ function setFixedLecture(e) {
 function classDetails(el) {
     let win = document.getElementById('class-details');
     while (win.firstChild) { win.removeChild(win.firstChild); }
-    document.getElementById('popup-window').addEventListener('contextmenu', function(e) { win.style.left = e.pageX+'px'; win.style.top = e.pageY+'px'; win.style.display = 'block'; });
+    document.getElementById('popup-window').addEventListener('contextmenu', function(e) { 
+        win.style.left = `${e.pageX}px`;
+        if (e.clientY+400 > window.innerHeight) { win.style.bottom = '10px'; }
+        else { win.style.top = `${e.clientY}px`; }
+        win.style.display = 'block'; 
+    });
 
     let class_name = el.querySelector('ul').firstChild.textContent;
     let class_info = JSON.parse(localStorage.getItem('candidates'))[class_name]

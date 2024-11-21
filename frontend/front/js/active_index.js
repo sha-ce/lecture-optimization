@@ -98,12 +98,17 @@ range.noUiSlider.on('update', function( values, handle ) {
 ////////////////////////////
 // キーワード選択用スクリプト //
 ////////////////////////////
+function getTextFile(path='./front/keywords.txt') {
+    let request = new XMLHttpRequest();
+    request.open('GET', path, false);
+    request.send();
+    let keywords = request.responseText.split('\n');
+    keywords.pop();
+    return keywords
+}
 let el_key = document.getElementById('keywords'); // [var] キーワード選択の親エレメント
-var keywords = [                                  // [var] キーワード
-    '科学技術日本語', '英語', '初等整数論', '群論', '可換環論', 
-    '有限体論', 'RSA暗号', '楕円曲線号', '機械学習', '深層学習',
-    '最適化', 'ソルバー',
-];
+const keywords = getTextFile();                   // [var] キーワード
+console.log(keywords)
 let selected_keywords = [];                       // [var] localstrageのキーワードを格納する
 if (localStorage.hasOwnProperty('keywords')) {    // [process] localstrage内のchekedキーワードを調べるための処理
     let ks = localStorage.getItem('keywords').split(', ');

@@ -70,9 +70,6 @@ function setInfo() { // [func] localstrageから情報を取ってきてyour inf
         <p>単位数 ${units[0]} 単位以上, ${units[1]} 単位以下</p>
         <h3>Keywords</h3>
         <p>${localStorage.getItem('keywords')}</p>
-        <div class="button-wrapper">
-        <button type="submit" id="submit" class="submit" onclick="window.location.assign('../../index.html');">条件調整</button>
-        </div>
     `;
     selected_conditions.insertAdjacentHTML("beforeend", conditions_code);
 }

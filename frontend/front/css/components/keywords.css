@@ -1,6 +1,8 @@
 .keywords {
     margin: 10px auto;
     width: 80%;
+    height: 256px;
+    overflow-y: auto;
 }
 .keywords input {
     display: none;
