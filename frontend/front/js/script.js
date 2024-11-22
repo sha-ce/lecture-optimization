@@ -280,7 +280,7 @@ function onStage(e, isOthers=false) {
         let cs = e.querySelector('ul').children;
         inline = `<button class="course popup-course" onclick="outStage(this, isOthers=true)" oncontextmenu="classDetails(this)"><ul>`;
         for (let i=0; i<cs.length; i++) { inline += `<li>${cs[i].textContent}</li>` }
-        e.parentNode.children[1].insertAdjacentHTML("beforebegin", `${inline}</ul></button>`);
+        e.parentNode.children[0].insertAdjacentHTML("afterend", `${inline}</ul></button>`);
         e.remove();
     } else {
         let children = e.parentNode.children;
