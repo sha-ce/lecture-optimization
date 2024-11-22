@@ -11,6 +11,7 @@ function openCloseChat() {                                                      
 const chatWindow = document.getElementById("chat-window"); // [var] chatウィンドウを表示するエレメント
 const chatInput = document.getElementById("chat-input");   // [var] テキスト入力部分のエレメント
 const sendButton = document.getElementById("send-button"); // [var] テキスト送信ボタンのエレメント
+
 function addMessage(content, sender) {                     // [func] 通常のメッセージを追加する関数
     const messageDiv = document.createElement("div");
     messageDiv.classList.add("message", sender);
@@ -18,10 +19,20 @@ function addMessage(content, sender) {                     // [func] 通常の�
     chatWindow.appendChild(messageDiv);
     chatWindow.scrollTop = chatWindow.scrollHeight;
 }
-function typeMessage(message, sender) {                    // [func] LLMの出力をストリーミングアニメーションで出力する
+function typeMessage(message, sender, t=20) {              // [func] LLMの出力をストリーミングアニメーションで出力する
+    const wrap = document.createElement("div");
+    wrap.classList.add('message-wrapper');
+
+    const icon = document.createElement("img");
+    icon.src = '../../favicon.ico';
+    icon.classList.add('message-icon');
+    wrap.appendChild(icon);
+    
     const messageDiv = document.createElement("div");
     messageDiv.classList.add("message", sender, "typing");
-    chatWindow.appendChild(messageDiv);
+    wrap.appendChild(messageDiv);
+
+    chatWindow.appendChild(wrap);
     chatWindow.scrollTop = chatWindow.scrollHeight;
     let currentIndex = 0;
     const interval = setInterval(() => {
@@ -29,7 +40,30 @@ function typeMessage(message, sender) {                    // [func] LLMの出�
         messageDiv.textContent += message[currentIndex];
         currentIndex++;
         if (currentIndex === message.length) { clearInterval(interval); messageDiv.classList.remove("typing"); }
-    }, 20); // 20ms
+    }, t); // 20ms
+}
+function chatLoading() {
+    let wrap = document.createElement("div");
+    wrap.classList.add('message-wrapper');
+
+    const icon = document.createElement("img");
+    icon.src = '../../favicon.ico';
+    icon.classList.add('message-icon');
+    wrap.appendChild(icon);
+
+    const loading_animation = document.createElement('div');
+    loading_animation.classList.add('message', 'bot');
+
+    let la = document.createElement('div')
+    la.classList.add('loading-animation');
+    for (let i=0; i<3; i++) { la.appendChild(document.createElement('div')); }
+    loading_animation.appendChild(la);
+    
+    wrap.appendChild(loading_animation);
+    chatWindow.appendChild(wrap);
+}
+function chatLoaded() {
+    chatWindow.lastElementChild.remove();
 }
 // [var] チャット履歴を格納する変数、初期値にLLM側のテキストを入れる。
 var chatHistory = ['僕はみんなの要望を受けて、時間割の提案を変更するエージェントだよ。何か要望があれば言ってね。'];
@@ -42,6 +76,7 @@ function sendMessage() {                                                     // 
         chatInput.value = '';                                                // [process] 入力を空にする
         if (chatHistory.length > 5) { chatHistory.splice(1, 2); }            // [process] 履歴を全て送信するとターン数が多くなると遅くなるので3ターン(len=5)後からidx=0だけ残してidx=1,2の記憶を消去
         chatHistory.push(message);
+        chatLoading();
 
         let alphas = localStorage.getItem('alphas').split(',').map(Number);
         const url = BASE_URL+'llm/chat/';
@@ -81,6 +116,7 @@ function sendMessage() {                                                     // 
                 console.log("Null response received, retaining original parameters");
             }
             setInfo();
+            chatLoaded();
             let llmans = res.response.slice(-1)[0];
             typeMessage(llmans, 'bot');
             chatHistory.push(llmans);

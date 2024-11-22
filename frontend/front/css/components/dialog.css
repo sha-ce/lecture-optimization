@@ -23,7 +23,7 @@
 .chat-window {
     flex: 1;
     margin: 10px 5px;
-    padding: 20px;
+    padding: 10px;
     background-color: #fff;
     overflow-y: auto;
     height: 500px; /* 固定の高さを設定 */
@@ -103,4 +103,15 @@
 #send-button:active {
     transform: scale(0.8);
     transition: 0.1s;
+}
+
+.message-wrapper {
+    display: flex;
+}
+.message-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: solid 0.5px #aaa;
+    margin: 5px 10px 0 0;
 }

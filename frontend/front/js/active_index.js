@@ -108,7 +108,6 @@ function getTextFile(path='./front/keywords.txt') {
 }
 let el_key = document.getElementById('keywords'); // [var] キーワード選択の親エレメント
 const keywords = getTextFile();                   // [var] キーワード
-console.log(keywords)
 let selected_keywords = [];                       // [var] localstrageのキーワードを格納する
 if (localStorage.hasOwnProperty('keywords')) {    // [process] localstrage内のchekedキーワードを調べるための処理
     let ks = localStorage.getItem('keywords').split(', ');
