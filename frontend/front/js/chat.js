@@ -44,6 +44,7 @@ function typeMessage(message, sender, t=20) {              // [func] LLMの出�
 }
 function chatLoading() {
     let wrap = document.createElement("div");
+    wrap.id = 'message-loader';
     wrap.classList.add('message-wrapper');
 
     const icon = document.createElement("img");
@@ -63,7 +64,7 @@ function chatLoading() {
     chatWindow.appendChild(wrap);
 }
 function chatLoaded() {
-    chatWindow.lastElementChild.remove();
+    document.getElementById('message-loader').remove();
 }
 // [var] チャット履歴を格納する変数、初期値にLLM側のテキストを入れる。
 var chatHistory = ['僕はみんなの要望を受けて、時間割の提案を変更するエージェントだよ。何か要望があれば言ってね。'];
