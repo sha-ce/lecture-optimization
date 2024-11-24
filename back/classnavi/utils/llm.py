@@ -43,7 +43,7 @@ def NeedRecalc(chat_history: list, param_dict: dict) -> dict:
         - Optimization of class days: {alpha_0} (-5 indicates more class days, 5 indicates fewer class days)
         - Fewer assignments: {alpha_1} (-5 indicates more assignments, 5 indicates fewer assignments)
         - Optimization of credit hours: {alpha_2} (-5 indicates more credits, 5 indicates fewer credits)
-        - Fewer remote classes: {alpha_3} (-5 indicates more remote classes, 5 indicates fewer remote classes)
+        - Fewer remote classes: {alpha_3} (-5 indicates fewer remote classes, 5 indicates more remote classes)
         - Fewer courses of interest: {alpha_4} (-5 indicates more uninteresting courses, 5 indicates more interesting courses)
         - Fewer exams: {alpha_6} (-5 indicates more exams, 5 indicates fewer exams)
 
