@@ -26,24 +26,28 @@ def parse_times(schedule):
 def optimize_classes(alpha_values, data_path='data.csv', quarter=1, L_early=0, min_units=1, max_units=float('inf'), keywords="", pdf_content=None, non_selectable_classes=[], must_select_classes=[], special="", social=""):
     # データ読み込み
     df = pd.read_csv(data_path)
-    print(f"初期データフレームの行数: {len(df)}")
 
     special_dict = {"メディア情報学コース": "メディア情報学", "データ科学コース": "データ科学", "人工知能コース": "人工知能", "": "人工知能"}
     social_dict = {"AI応用コース": "AI応用", "金融流通コース": "金融・流通", "ソフトウェア開発プロセスコース": "ソフトウェア開発プロセス", "画像認識コース": "画像認識", "アントレプレナーシップコース": "アントレプレナーシップ", "": "アントレプレナーシップ"}
+    matching_data = df[df['semester'] == f"第{quarter}クォーター"]
 
     # 開講クオーターの制限
     df = df[((df['semester'] == "前期") & (quarter in [1, 2])) |
         ((df['semester'] == "後期") & (quarter in [3, 4])) |
         (df['semester'] == f"第{quarter}クォーター")]
-    print(f"開講クオーターでフィルタリング後の行数: {len(df)}") 
+    target_classname = "最適化アルゴリズム論"
+    target_data = df[df["classname"] == target_classname]
 
     df = df[
         ((df["course"] == special_dict[special]) |
         (df["course"] == social_dict[social]) |
         (df["course"] == "基礎科目") |
-        (df["course"] == "GEプログラム"))
+        (df["course"] == "GEプログラム") |
+        (df["class"] == special_dict[special]) |
+        (df["class"] == social_dict[social]) |
+        (df["class"] == "基礎科目") |
+        (df["class"] == "GEプログラム"))
     ]
-    print(f"コース制限でフィルタリング後の行数: {len(df)}")
 
     # PDFファイルから習得済みの授業を抽出
     if pdf_content is not None:
@@ -144,23 +148,19 @@ def optimize_classes(alpha_values, data_path='data.csv', quarter=1, L_early=0, m
 
     # 制約違反を可視化
     violated_constraints = [desc for desc, constraint in debug_constraints if not constraint.valid()]
-    print("制約違反:", violated_constraints)
     
     # 結果の取得
     result = df[df.index.isin([i for i in df.index if x_vars[i].value() == 1])].to_dict(orient='records')
-    print("result: ", result)
 
     # 最適化問題のステータスを確認し、適切なメッセージを出力
     if pulp.LpStatus[status] == 'Infeasible':
         # infeasible の場合、必修科目のみ選択し、他の授業は選択可能なもののみを返す
         selected_classes = df[(df['unitclass'] == '必修') | (df.index.isin([i for i in df.index if x_vars[i].value() == 1]))]
-        print("infeasible")
         return json.dumps({
             "message": "制約が厳しすぎます。",
             "selected_classes": selected_classes.to_dict(orient='records')
         }, ensure_ascii=False)
     elif pulp.LpStatus[status] == 'Optimal':
-        print("Optimal")
         selected_classes = df[df.index.isin([i for i in df.index if x_vars[i].value() == 1])].copy()
     
         # times 列を見やすい形式に整形
@@ -168,7 +168,6 @@ def optimize_classes(alpha_values, data_path='data.csv', quarter=1, L_early=0, m
         
         # 整形した times 列を使用して結果を出力
         result = selected_classes[['classname', 'formatted_times', 'unitclass', 'numofunits', "teacher", "test", "remote", "homework", "when", "semester", "l_i"]].to_dict(orient='records')
-        print(result)
         return json.dumps(result, ensure_ascii=False)
     else:
         return f"最適化問題の解決に失敗しました。ステータス: {pulp.LpStatus[status]}"

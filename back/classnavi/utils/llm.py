@@ -15,6 +15,7 @@ from langchain_google_genai import GoogleGenerativeAIEmbeddings
 from langchain_core.documents import Document
 from langchain.chains import RetrievalQA
 import pandas as pd
+import random
 
 # Get Groq API Key
 groq_api_key = os.getenv("GROQ_API")
@@ -100,13 +101,11 @@ def NeedRecalc(chat_history: list, param_dict: dict) -> dict:
     )
 
     response = conversation.predict(input_message=chat_prompt)
-    print(response)
 
     # 不要なコメント部分を削除して、純粋なJSONデータ部分を取得
     cleaned_response = re.sub(r'//.*', '', response)
     response_cleaned = re.sub(r'\(.*?\)', '', cleaned_response) # ()内の文言を削除
     response_cleaned = re.sub(r'\n', '', response_cleaned)
-    print(response_cleaned)
 
     json_matches = re.findall(r'\{.*?\}', response_cleaned)
 
@@ -141,7 +140,6 @@ def generate_response(chat_history: list, param_dict: list, class_info: dict, us
         "special": "メディア情報学コース",
         "semester": "Q1"
     """
-    print(f"userinfo:dict: {userinfo_dict}")
     # 課題の量を文章に変換するマッピング
     homework_mapping = {
         -5: "ほとんど課題がない",
@@ -226,16 +224,20 @@ def generate_response(chat_history: list, param_dict: list, class_info: dict, us
     df = df[((df['semester'] == "前期") & (userinfo_dict["semester"] in [1, 2])) |
         ((df['semester'] == "後期") & (userinfo_dict["semester"] in [3, 4])) |
         (df['semester'] == f"第{userinfo_dict['semester']}クォーター")]
-
     df = df[
         ((df["course"] == special_dict[userinfo_dict["special"]]) |
         (df["course"] == social_dict[userinfo_dict["social"]]) |
         (df["course"] == "基礎科目") |
-        (df["course"] == "GEプログラム"))
+        (df["course"] == "GEプログラム") |
+        (df["class"] == special_dict[userinfo_dict["special"]]) |
+        (df["class"] == social_dict[userinfo_dict["social"]]) |
+        (df["class"] == "基礎科目") |
+        (df["class"] == "GEプログラム"))
     ]
     # ランダムに10個の行を選択
     if len(df) > 10:
-        df = df.sample(n=10, random_state=random.randint(0, 10000))  # 再現性が必要な場合は random_state を固定
+        df = df.sample(n=10, random_state=random.randint(0, 10000))
+
     context = "\n".join([
         (
             f"{row['classname']}の授業は{row['when']}に開講され、"
@@ -248,7 +250,6 @@ def generate_response(chat_history: list, param_dict: list, class_info: dict, us
         )
         for _, row in df.iterrows()
     ])
-    print(context)
 
     # プロンプトの組み立て
     messages = [("system", system_prompt)]
@@ -262,7 +263,6 @@ def generate_response(chat_history: list, param_dict: list, class_info: dict, us
     else:
         messages.append(("system", f"回答は必ず以下の情報のみを基に回答を生成してください．もし情報が与えられなかった場合は「ごめん，分からない．」と回答してください．:\n{context}"))
 
-    # print(messages)
     prompt = ChatPromptTemplate.from_messages(messages)
 
     conversation = LLMChain(
