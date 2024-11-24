@@ -80,6 +80,10 @@ function sendMessage() {                                                     // 
         chatLoading();
 
         let alphas = localStorage.getItem('alphas').split(',').map(Number);
+        let social = localStorage.getItem('social');
+        let special = localStorage.getItem('special');
+        let semester = localStorage.getItem('quarter');
+        console.log(alphas, social, special, semester);
         const url = BASE_URL+'llm/chat/';
         const config = {
             method: 'POST',
@@ -94,6 +98,11 @@ function sendMessage() {                                                     // 
                     "Fewer courses of interest": alphas[4],
                     "Fewer exams": alphas[6],
                     "Fewer assignments": alphas[1],
+                },
+                user_info: {
+                    "social": social,
+                    "special": special,
+                    "quarter": semester,
                 }
             }),
         }

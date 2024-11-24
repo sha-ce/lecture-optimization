@@ -20,3 +20,4 @@ class Cell(BaseModel):
 class ChatInput(BaseModel):
     questions: List[str]
     preferences: Dict[str, int]
+    user_info: Dict[str, str]

@@ -12,7 +12,6 @@ from langchain_core.prompts import (
 from langchain_groq import ChatGroq
 from langchain_google_genai import GoogleGenerativeAIEmbeddings
 
-from langchain.vectorstores import Chroma
 from langchain_core.documents import Document
 from langchain.chains import RetrievalQA
 import pandas as pd
@@ -20,74 +19,7 @@ import pandas as pd
 # Get Groq API Key
 groq_api_key = os.getenv("GROQ_API")
 groq_chat = ChatGroq(groq_api_key=groq_api_key, model_name="llama3-70b-8192")
-embeddings = GoogleGenerativeAIEmbeddings(model="models/embedding-001", task_type="retrieval_document")
 csv_path = "classnavi/datas/after.csv"
-
-def create_class_documents(data_path: str):
-    """
-    data_path: str: 授業情報を含むCSVファイルのパス
-    """
-    # データ読み込み
-    df = pd.read_csv(data_path)
-
-    # 課題の量の数値を文章に変換するマッピング
-    homework_mapping = {
-        -5: "ほとんど課題がない",
-        -4: "かなり少ない課題量",
-        -3: "少なめの課題量",
-        -2: "やや少ない課題量",
-        -1: "少しだけ課題がある",
-        0: "平均的な課題量",
-        1: "少し多めの課題",
-        2: "やや多い課題量",
-        3: "多めの課題量",
-        4: "かなり多い課題量",
-        5: "非常に多い課題量"
-    }
-
-    # 各行に対してDocumentオブジェクトを生成
-    documents = []
-    for _, row in df.iterrows():
-        classname = row['classname']
-        teacher = row['teacher']
-        test = "あり" if row['test'].lower() == "yes" else "なし"
-        remote = "リモート授業" if row['remote'].lower() == "yes" else "対面授業"
-        homework = homework_mapping.get(row['homework'], "不明な課題量")
-        numofunits = row['numofunits']
-        when = row['when']
-        semester = row['semester']
-        unitclass = row['unitclass']
-        keyword = row['keyword']
-        classoutline = row['classoutline']
-
-        # 文章を作成
-        description = (
-            f"{classname}の授業は{when}に開講され、"
-            f"担当教員は{teacher}で、テストは{test}、"
-            f"{remote}であり、宿題の量は{homework}、"
-            f"単位数は{numofunits}、学期は{semester}、"
-            f"授業区分は{unitclass}、キーワードは{keyword}、"
-            f"授業概要は{classoutline}です。"
-        )
-
-        # Documentオブジェクトを作成しリストに追加
-        documents.append(Document(page_content=description))
-
-    return documents
-
-def create_class_vector_store(documents):
-    """
-    documents: list: Documentオブジェクトのリスト
-    """
-
-    # ベクトルストアの作成
-    vector_store = Chroma.from_documents(documents, embedding=embeddings, persist_directory=None)
-    retriever = vector_store.as_retriever(search_kwargs={'k': 5})
-
-    return retriever
-
-documents = create_class_documents(csv_path)
-retriever = create_class_vector_store(documents)
 
 # パラメータの再計算が必要かどうかを判定する関数
 def NeedRecalc(chat_history: list, param_dict: dict) -> dict:
@@ -198,14 +130,36 @@ def NeedRecalc(chat_history: list, param_dict: dict) -> dict:
 
     return result
 
-def generate_response(chat_history: list, param_dict: list, class_info: dict) -> str:
+def generate_response(chat_history: list, param_dict: list, class_info: dict, userinfo_dict: dict) -> str:
     """
     ユーザーへのレスポンスを生成する関数
+    userinfo_dict: ユーザーの情報を含む辞書
+    例：
+    userinfo_dict = {
+        "compulsory": "知能情報",
+        "social": "AI応用コース",
+        "special": "メディア情報学コース",
+        "semester": "Q1"
     """
+    print(f"userinfo:dict: {userinfo_dict}")
+    # 課題の量を文章に変換するマッピング
+    homework_mapping = {
+        -5: "ほとんど課題がない",
+        -4: "かなり少ない課題量",
+        -3: "少なめの課題量",
+        -2: "やや少ない課題量",
+        -1: "少しだけ課題がある",
+        0: "平均的な課題量",
+        1: "少し多めの課題",
+        2: "やや多い課題量",
+        3: "多めの課題量",
+        4: "かなり多い課題量",
+        5: "非常に多い課題量"
+    }
+    extracted_info = ""
     if class_info: 
         # CSVの読み込み
         class_data = pd.read_csv(csv_path)
-        print(class_data.head())
 
         # teacher_name の取得と正規化
         teacher_name_raw = class_info.get('teacher', '')
@@ -241,17 +195,17 @@ def generate_response(chat_history: list, param_dict: list, class_info: dict) ->
         extracted_info = "\n".join([
             (
                 f"{row['classname']}の授業は{row['when']}に開講され、"
-                f"担当教員は{row['teacher']}で、テストは{row['test']}、"
-                f"{row['remote']}であり、宿題の量は{row['homework']}、"
+                f"担当教員は{row['teacher']}で、テストは{'あり' if row['test'].lower() == 'yes' else 'なし'}、"
+                f"{'リモート授業' if row['remote'].lower() == 'yes' else '対面授業'}であり、"
+                f"宿題の量は{homework_mapping.get(row['homework'], '不明な課題量')}、"
                 f"単位数は{row['numofunits']}、学期は{row['semester']}、"
                 f"授業区分は{row['unitclass']}、キーワードは{row['keyword']}、"
                 f"授業概要は{row['classoutline']}です。"
-                f"講義の種類は{row['class']}、コースは{row['course']}。"
             )
             for _, row in filtered_data.iterrows()
         ])
 
-    system_prompt = "あなたは大学の友達．ユーザーが時間割を決定する上で役立ちそうな情報があれば，ユーザーに教えてあげて．回答は全て日本語で行って，友達みたいにフラットにタメ口で話す感じでよろしく．だけど回答は絶対に与えられた情報だけを使って行いなさい．"
+    system_prompt = "あなたは大学の友達．ユーザーが時間割を決定する上で役立ちそうな情報があれば，ユーザーに教えてあげて．回答は全て日本語で行って，友達みたいにフラットにタメ口で話す感じでよろしく．それと絶対に与えられた情報だけを使って回答して．もし，授業情報がプロンプトに含まれていない場合は，「ごめん，それはわからない」とはっきり言って．"
 
     # チャット履歴が10を超える場合は最新の10件に制限する
     if len(chat_history) > 10:
@@ -260,23 +214,53 @@ def generate_response(chat_history: list, param_dict: list, class_info: dict) ->
     # 最新のユーザーの入力を取得
     user_input = chat_history[-1]
 
-    # 関連コンテキストの取得
-    related_docs = retriever.get_relevant_documents(user_input)
-    
-    context = "\n".join([doc.page_content for doc in related_docs])
+    # csvファイルを読み込み
+    df = pd.read_csv(csv_path)
+
+    special_dict = {"メディア情報学コース": "メディア情報学", "データ科学コース": "データ科学", "人工知能コース": "人工知能", "": "人工知能"}
+    social_dict = {"AI応用コース": "AI応用", "金融流通コース": "金融・流通", "ソフトウェア開発プロセスコース": "ソフトウェア開発プロセス", "画像認識コース": "画像認識", "アントレプレナーシップコース": "アントレプレナーシップ", "": "アントレプレナーシップ"}
+    quater_dict = {"Q1": 1, "Q2": 2, "Q3": 3, "Q4": 4}
+    userinfo_dict["semester"] = quater_dict[userinfo_dict["quarter"]]
+
+    # 開講クオーターの制限
+    df = df[((df['semester'] == "前期") & (userinfo_dict["semester"] in [1, 2])) |
+        ((df['semester'] == "後期") & (userinfo_dict["semester"] in [3, 4])) |
+        (df['semester'] == f"第{userinfo_dict['semester']}クォーター")]
+
+    df = df[
+        ((df["course"] == special_dict[userinfo_dict["special"]]) |
+        (df["course"] == social_dict[userinfo_dict["social"]]) |
+        (df["course"] == "基礎科目") |
+        (df["course"] == "GEプログラム"))
+    ]
+    # ランダムに10個の行を選択
+    if len(df) > 10:
+        df = df.sample(n=10, random_state=random.randint(0, 10000))  # 再現性が必要な場合は random_state を固定
+    context = "\n".join([
+        (
+            f"{row['classname']}の授業は{row['when']}に開講され、"
+            f"担当教員は{row['teacher']}で、テストは{'あり' if row['test'].lower() == 'yes' else 'なし'}、"
+            f"{'リモート授業' if row['remote'].lower() == 'yes' else '対面授業'}であり、"
+            f"宿題の量は{homework_mapping.get(row['homework'], '不明な課題量')}、"
+            f"単位数は{row['numofunits']}、学期は{row['semester']}、"
+            f"授業区分は{row['unitclass']}、キーワードは{row['keyword']}、"
+            f"授業概要は{row['classoutline']}です。"
+        )
+        for _, row in df.iterrows()
+    ])
+    print(context)
 
     # プロンプトの組み立て
     messages = [("system", system_prompt)]
     for i in range(len(chat_history)):
         role = "ai" if i % 2 == 0 else "human"
         messages.append((role, chat_history[i]))
-    # print(f"context: {context}")
 
     if class_info:
         if extracted_info:
-            messages.append(("system", f"以下の情報を基に回答を生成してください:\n{context}\n{extracted_info}"))
+            messages.append(("system", f"回答は必ず以下の情報のみを基に回答を生成してください．もし情報が与えられなかった場合は「ごめん，分からない．」と回答してください．:\n{extracted_info}"))
     else:
-        messages.append(("system", f"以下の情報を基に回答を生成してください:\n{context}"))
+        messages.append(("system", f"回答は必ず以下の情報のみを基に回答を生成してください．もし情報が与えられなかった場合は「ごめん，分からない．」と回答してください．:\n{context}"))
 
     # print(messages)
     prompt = ChatPromptTemplate.from_messages(messages)
@@ -295,13 +279,13 @@ def generate_response(chat_history: list, param_dict: list, class_info: dict) ->
     return new_chat_history
     
 # ユーザーへのレスポンスを生成する関数
-def chat_pipeline(chat_history: list, param_dict: dict) -> str:
+def chat_pipeline(chat_history: list, param_dict: dict, userinfo_dict: dict) -> str:
 
     # ユーザーからのinputを基にNeedReculcを実行
     results = NeedRecalc(chat_history, param_dict)
 
     # ユーザーへの回答を生成
-    response = generate_response(chat_history, param_dict, results["class_info"])
+    response = generate_response(chat_history, param_dict, results["class_info"], userinfo_dict)
     return response, results["params"]
 
 def test_chatbot():

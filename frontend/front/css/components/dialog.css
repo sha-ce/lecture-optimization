@@ -114,4 +114,6 @@
     border-radius: 50%;
     border: solid 0.5px #aaa;
     margin: 5px 10px 0 0;
+    object-fit: cover;
+    overflow: hidden;
 }
