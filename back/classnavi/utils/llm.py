@@ -154,6 +154,16 @@ def generate_response(chat_history: list, param_dict: list, class_info: dict, us
         4: "かなり多い課題量",
         5: "非常に多い課題量"
     }
+
+    # 難易度を文章に変換するマッピング
+    difficulty_mapping = {
+        1: "とても簡単",
+        2: "簡単",
+        3: "普通",
+        4: "難しい",
+        5: "非常に難しい"
+    }
+
     extracted_info = ""
     if class_info: 
         # CSVの読み込み
@@ -198,7 +208,8 @@ def generate_response(chat_history: list, param_dict: list, class_info: dict, us
                 f"宿題の量は{homework_mapping.get(row['homework'], '不明な課題量')}、"
                 f"単位数は{row['numofunits']}、学期は{row['semester']}、"
                 f"授業区分は{row['unitclass']}、キーワードは{row['keyword']}、"
-                f"授業概要は{row['classoutline']}です。"
+                f"授業概要は{row['classoutline']}，"
+                f"難易度は{difficulty_mapping.get(row['difficulty'], '不明な難易度')}です。"
             )
             for _, row in filtered_data.iterrows()
         ])

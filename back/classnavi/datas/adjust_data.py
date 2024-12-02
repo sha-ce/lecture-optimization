@@ -43,6 +43,6 @@ def clean_and_format_csv(input_path, output_path):
     print(f"整形されたデータを {output_path} に保存しました。")
 
 # 実行例
-input_file = "data.csv"  # 入力ファイルパス
+input_file = "updated_data.csv"  # 入力ファイルパス
 output_file = "after.csv"  # 出力ファイルパス
 clean_and_format_csv(input_file, output_file)
