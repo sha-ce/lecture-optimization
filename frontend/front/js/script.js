@@ -340,7 +340,7 @@ function setLecture() {
     function othersProcess(table, staged, unstaged) {let adds = [[null, null]];for (let [k, c] of Object.entries(staged)) {if (!Object.keys(table).includes(k)) {adds.push([k, c]);}}for (let [k, _] of Object.entries(unstaged)) {if (Object.keys(table).includes(k)) {delete table[k];}}execute(table, deletes=[null], adds=adds);}
 
     let table = JSON.parse(localStorage.getItem('table'));            // [var] localのtable
-    if (table == null) { table = []; }
+    if (table == null) { table = {}; }
     let filled_daytimes = getFillDaytimes(table);                     // [var] tableに埋まっている講義の曜日時限
     let e = document.getElementById('classes-wrapper');               // [var] 選択したセルの曜日時限と一致する講義の親エレメント
     let daytime = e.children[0].getAttribute('value');                // [var] 選択したセルの曜日時限
