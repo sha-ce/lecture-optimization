@@ -82,13 +82,14 @@ function get(data) { // [func] localstrageにある各アイテムをバック�
 
     const config = {
         method: "POST",
-        headers: {'Content-Type': 'multipart/form-data'},
+        // headers: {'Content-Type': 'multipart/form-data'},
         body: body // [var] itemsの文字列と、pdfファイルがあるならそのバイナリの2つを格納したデータ
     }
     fetch(url, config)
     .then(response => { return response.json(); })
     .then(res => {
         loaded();
+        // console.log(res);
         if (!Array.isArray(res)) { alert('制約が厳しすぎます。各種パラメータを再調整してください。'); }
         else { setLocalClasses('table', res); fill(); }
     })
