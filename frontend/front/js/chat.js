@@ -84,7 +84,7 @@ function sendMessage() {                                                     // 
         let special = localStorage.getItem('special');
         let semester = localStorage.getItem('quarter');
         console.log(alphas, social, special, semester);
-        const url = BASE_URL+'llm/chat/';
+        const url = BASE_URL+'llm/chat';
         const config = {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
