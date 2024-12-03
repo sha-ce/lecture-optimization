@@ -82,6 +82,7 @@ function get(data) { // [func] localstrageにある各アイテムをバック�
 
     const config = {
         method: "POST",
+        headers: {'Content-Type': 'multipart/form-data'},
         body: body // [var] itemsの文字列と、pdfファイルがあるならそのバイナリの2つを格納したデータ
     }
     fetch(url, config)
