@@ -67,7 +67,7 @@ function postToLocal() { // [func] getしたデータをlocalstarageに送信す
     }
 };
 function get(data) { // [func] localstrageにある各アイテムをバックに送信し、最適化された講義を得る
-    const url = BASE_URL+'optimizer/items';
+    const url = BASE_URL+'optimizer/items/';
     let body = new FormData();
     body.append('item', String(JSON.stringify(data)));
 
@@ -244,7 +244,7 @@ function popup(cell, isOthers=false) {
 
     document.getElementById('popup-window').style.display = 'block';
 
-    const url = BASE_URL+'optimizer/cell';
+    const url = BASE_URL+'optimizer/cell/';
     const config = {
         method: "POST",
         headers: {"Content-Type": "application/json"},
