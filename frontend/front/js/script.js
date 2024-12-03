@@ -1,9 +1,9 @@
 ///////////////////////////////
 // backにアクセするためのURL設定 //
 ///////////////////////////////
-const CURRENT_URL = window.location.href.split('/');                         // [var] frontの現在のURL
-const BASE_URL = `${CURRENT_URL[0]}//${CURRENT_URL[2].split(':')[0]}:8080/`; // [var] frontのURLを継承してportを8080に変更
-// const BASE_URL = 'https://lectopt.fly.dev/';
+// const CURRENT_URL = window.location.href.split('/');                         // [var] frontの現在のURL
+// const BASE_URL = `${CURRENT_URL[0]}//${CURRENT_URL[2].split(':')[0]}:8080/`; // [var] frontのURLを継承してportを8080に変更
+const BASE_URL = 'https://lectopt.fly.dev/';
 
 
 
